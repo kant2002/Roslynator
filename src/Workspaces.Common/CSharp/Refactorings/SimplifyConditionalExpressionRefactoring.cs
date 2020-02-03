@@ -14,6 +14,8 @@ namespace Roslynator.CSharp.Refactorings
 {
     internal static class SimplifyConditionalExpressionRefactoring
     {
+        public const string Title = "Simplify conditional expression";
+
         public static async Task<Document> RefactorAsync(
             Document document,
             ConditionalExpressionSyntax conditionalExpression,
@@ -33,10 +35,14 @@ namespace Roslynator.CSharp.Refactorings
             {
                 if (falseKind == SyntaxKind.FalseLiteralExpression)
                 {
+                    // a ? true : false >>> a
+
                     newNode = CreateNewNode(conditionalExpression, info.Condition);
                 }
                 else
                 {
+                    // a ? true : b >>> a || b
+
                     SyntaxTriviaList trailingTrivia = info
                         .QuestionToken
                         .LeadingTrivia
@@ -50,8 +56,39 @@ namespace Roslynator.CSharp.Refactorings
                         whenFalse.Parenthesize());
                 }
             }
+            else if (trueKind == SyntaxKind.FalseLiteralExpression)
+            {
+                if (falseKind == SyntaxKind.TrueLiteralExpression)
+                {
+                    // a ? false : true >>> !a
+
+                    SemanticModel semanticModel = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+
+                    newNode = CreateNewNode(conditionalExpression, SyntaxInverter.LogicallyInvert(info.Condition, semanticModel, cancellationToken));
+                }
+                else
+                {
+                    // a ? false : b >>> !a && b
+
+                    SemanticModel semanticModel = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+
+                    ExpressionSyntax newCondition = SyntaxInverter.LogicallyInvert(conditionalExpression.Condition, semanticModel, cancellationToken);
+
+                    SyntaxTriviaList trailingTrivia = info
+                        .QuestionToken.LeadingAndTrailingTrivia()
+                        .AddRange(whenTrue.GetLeadingAndTrailingTrivia())
+                        .EmptyIfWhitespace();
+
+                    newNode = LogicalAndExpression(
+                        newCondition.Parenthesize().AppendToTrailingTrivia(trailingTrivia),
+                        Token(info.ColonToken.LeadingTrivia, SyntaxKind.AmpersandAmpersandToken, info.ColonToken.TrailingTrivia),
+                        whenFalse.Parenthesize());
+                }
+            }
             else if (falseKind == SyntaxKind.FalseLiteralExpression)
             {
+                // a ? b : false >>> a && b
+
                 SyntaxTriviaList trailingTrivia = whenTrue
                     .GetTrailingTrivia()
                     .AddRange(info.ColonToken.LeadingTrivia)
@@ -65,12 +102,24 @@ namespace Roslynator.CSharp.Refactorings
                     Token(info.QuestionToken.LeadingTrivia, SyntaxKind.AmpersandAmpersandToken, info.QuestionToken.TrailingTrivia),
                     whenTrue.WithTrailingTrivia(trailingTrivia).Parenthesize());
             }
-            else if (trueKind == SyntaxKind.FalseLiteralExpression
-                && falseKind == SyntaxKind.TrueLiteralExpression)
+            else if (falseKind == SyntaxKind.TrueLiteralExpression)
             {
+                // a ? b : true >>> !a || b
+
                 SemanticModel semanticModel = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
 
-                newNode = CreateNewNode(conditionalExpression, SyntaxInverter.LogicallyInvert(info.Condition, semanticModel, cancellationToken));
+                ExpressionSyntax newCondition = SyntaxInverter.LogicallyInvert(conditionalExpression.Condition, semanticModel, cancellationToken);
+
+                SyntaxTriviaList trailingTrivia = whenTrue
+                    .GetTrailingTrivia()
+                    .AddRange(info.ColonToken.LeadingAndTrailingTrivia())
+                    .AddRange(whenFalse.GetLeadingAndTrailingTrivia())
+                    .EmptyIfWhitespace();
+
+                newNode = LogicalOrExpression(
+                    newCondition.Parenthesize(),
+                    Token(info.QuestionToken.LeadingTrivia, SyntaxKind.BarBarToken, info.QuestionToken.TrailingTrivia),
+                    whenTrue.Parenthesize().WithTrailingTrivia(trailingTrivia));
             }
 
             newNode = newNode.Parenthesize();

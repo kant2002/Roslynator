@@ -1,11 +1,14 @@
 ﻿// Copyright (c) Josef Pihrt. All rights reserved. Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Roslynator.CodeActions;
+using Roslynator.CSharp.Syntax;
 
 namespace Roslynator.CSharp.Refactorings
 {
@@ -34,6 +37,9 @@ namespace Roslynator.CSharp.Refactorings
                             RefactoringIdentifiers.FormatConditionalExpression);
                     }
                 }
+
+                if (context.IsRefactoringEnabled(RefactoringIdentifiers.SimplifyConditionalExpression))
+                    await SimplifyConditionalExpressionAsync(context, conditionalExpression).ConfigureAwait(false);
 
                 if (context.IsRefactoringEnabled(RefactoringIdentifiers.ConvertConditionalOperatorToIfElse))
                 {
@@ -64,6 +70,47 @@ namespace Roslynator.CSharp.Refactorings
                     "Invert ?:",
                     ct => InvertConditionalExpressionRefactoring.RefactorAsync(context.Document, conditionalExpression, ct),
                 RefactoringIdentifiers.InvertConditionalExpression);
+            }
+        }
+
+        private static async Task SimplifyConditionalExpressionAsync(RefactoringContext context, ConditionalExpressionSyntax conditionalExpression)
+        {
+            ConditionalExpressionInfo info = SyntaxInfo.ConditionalExpressionInfo(conditionalExpression);
+
+            if (!info.Success)
+                return;
+
+            SyntaxKind trueKind = info.WhenTrue.Kind();
+
+            if (trueKind == SyntaxKind.FalseLiteralExpression)
+            {
+                if (!info.WhenFalse.IsKind(SyntaxKind.TrueLiteralExpression, SyntaxKind.FalseLiteralExpression))
+                {
+                    SemanticModel semanticModel = await context.GetSemanticModelAsync().ConfigureAwait(false);
+
+                    if (semanticModel.GetTypeInfo(info.WhenFalse, context.CancellationToken).ConvertedType?.SpecialType == SpecialType.System_Boolean)
+                        RegisterRefactoring();
+                }
+            }
+            else if (trueKind != SyntaxKind.TrueLiteralExpression)
+            {
+                if (info.WhenFalse.IsKind(SyntaxKind.TrueLiteralExpression))
+                {
+                    SemanticModel semanticModel = await context.GetSemanticModelAsync().ConfigureAwait(false);
+
+                    if (semanticModel.GetTypeInfo(info.WhenTrue, context.CancellationToken).ConvertedType?.SpecialType == SpecialType.System_Boolean)
+                        RegisterRefactoring();
+                }
+            }
+
+            void RegisterRefactoring()
+            {
+                Document document = context.Document;
+
+                context.RegisterRefactoring(
+                    SimplifyConditionalExpressionRefactoring.Title,
+                    ct => SimplifyConditionalExpressionRefactoring.RefactorAsync(document, conditionalExpression, ct),
+                    RefactoringIdentifiers.SimplifyConditionalExpression);
             }
         }
     }

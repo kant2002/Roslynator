@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Refactorings>
+  <Refactoring Id="RR0214" Identifier="SimplifyConditionalExpression" Title="Simplify conditional expression" IsDevelopment="true">
+    <Syntaxes>
+      <Syntax>conditional expression</Syntax>
+    </Syntaxes>
+    <Samples>
+      <Sample>
+        <Before><![CDATA[a ? false : b]]></Before>
+        <After><![CDATA[!a && b]]></After>
+      </Sample>
+      <Sample>
+        <Before><![CDATA[a ? b : true]]></Before>
+        <After><![CDATA[!a || b]]></After>
+      </Sample>
+    </Samples>
+    <Remarks>This refactoring is complement to analyzer [pihrt.net/roslynator/analyzers?id=rcs1104](RCS1104).</Remarks>
+  </Refactoring>
+</Refactorings>

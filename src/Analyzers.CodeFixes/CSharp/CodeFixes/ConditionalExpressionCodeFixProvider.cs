@@ -73,14 +73,8 @@ namespace Roslynator.CSharp.CodeFixes
                     case DiagnosticIdentifiers.SimplifyConditionalExpression:
                         {
                             CodeAction codeAction = CodeAction.Create(
-                                "Simplify conditional expression",
-                                cancellationToken =>
-                                {
-                                    return SimplifyConditionalExpressionRefactoring.RefactorAsync(
-                                        document,
-                                        conditionalExpression,
-                                        cancellationToken);
-                                },
+                                SimplifyConditionalExpressionRefactoring.Title,
+                                ct => SimplifyConditionalExpressionRefactoring.RefactorAsync(document, conditionalExpression, ct),
                                 GetEquivalenceKey(diagnostic));
 
                             context.RegisterCodeFix(codeAction, diagnostic);
