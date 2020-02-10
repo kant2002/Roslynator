@@ -91,10 +91,9 @@ class C
 {
     void M()
     {
-            bool f1 = false;
-            bool f2 = false;
+        bool x = false, y = false;
 
-            f1 = [|!!(f2)|];
+        x = [|!!(y)|];
     }
 }
 ", @"
@@ -102,10 +101,9 @@ class C
 {
     void M()
     {
-            bool f1 = false;
-            bool f2 = false;
+        bool x = false, y = false;
 
-            f1 = f2;
+        x = y;
     }
 }
 ");
@@ -119,10 +117,9 @@ class C
 {
     void M()
     {
-            bool f1 = false;
-            bool f2 = false;
+        bool x = false, y = false;
 
-            f1 = [|!(!(f2))|];
+        x = [|!(!(y))|];
     }
 }
 ", @"
@@ -130,10 +127,9 @@ class C
 {
     void M()
     {
-            bool f1 = false;
-            bool f2 = false;
+        bool x = false, y = false;
 
-            f1 = f2;
+        x = y;
     }
 }
 ");
@@ -147,10 +143,9 @@ class C
 {
     void M()
     {
-            bool f1 = false;
-            bool f2 = false;
+        bool x = false, y = false;
 
-            f1 = [|!(f1 == f2)|];
+        x = [|!(x == y)|];
     }
 }
 ", @"
@@ -158,10 +153,9 @@ class C
 {
     void M()
     {
-            bool f1 = false;
-            bool f2 = false;
+        bool x = false, y = false;
 
-            f1 = f1 != f2;
+        x = x != y;
     }
 }
 ");
@@ -175,10 +169,9 @@ class C
 {
     void M()
     {
-            bool f1 = false;
-            bool f2 = false;
+        bool x = false, y = false;
 
-            f1 = [|!(f1 != f2)|];
+        x = [|!(x != y)|];
     }
 }
 ", @"
@@ -186,10 +179,321 @@ class C
 {
     void M()
     {
-            bool f1 = false;
-            bool f2 = false;
+        bool x = false, y = false;
 
-            f1 = f1 == f2;
+        x = x == y;
+    }
+}
+");
+        }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.SimplifyLogicalNegation)]
+        public async Task Test_LessThanExpression_Int32()
+        {
+            await VerifyDiagnosticAndFixAsync(@"
+class C
+{
+    void M()
+    {
+        int x = 1, y = 2;
+
+        if ([|!(x < y)|]) { }
+    }
+}
+", @"
+class C
+{
+    void M()
+    {
+        int x = 1, y = 2;
+
+        if (x >= y) { }
+    }
+}
+");
+        }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.SimplifyLogicalNegation)]
+        public async Task Test_LessThanExpression_Single()
+        {
+            await VerifyDiagnosticAndFixAsync(@"
+class C
+{
+    void M()
+    {
+        const float x = 1;
+
+        if ([|!(x < 1f)|]) { }
+    }
+}
+", @"
+class C
+{
+    void M()
+    {
+        const float x = 1;
+
+        if (x >= 1f) { }
+    }
+}
+");
+        }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.SimplifyLogicalNegation)]
+        public async Task Test_LessThanExpression_Double()
+        {
+            await VerifyDiagnosticAndFixAsync(@"
+class C
+{
+    void M()
+    {
+        const double x = 1;
+
+        if ([|!(x < 1d)|]) { }
+    }
+}
+", @"
+class C
+{
+    void M()
+    {
+        const double x = 1;
+
+        if (x >= 1d) { }
+    }
+}
+");
+        }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.SimplifyLogicalNegation)]
+        public async Task Test_LessThanOrEqualsExpression_Int32()
+        {
+            await VerifyDiagnosticAndFixAsync(@"
+class C
+{
+    void M()
+    {
+        int x = 1, y = 2;
+
+        if ([|!(x <= y)|]) { }
+    }
+}
+", @"
+class C
+{
+    void M()
+    {
+        int x = 1, y = 2;
+
+        if (x > y) { }
+    }
+}
+");
+        }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.SimplifyLogicalNegation)]
+        public async Task Test_LessThanOrEqualsExpression_Single()
+        {
+            await VerifyDiagnosticAndFixAsync(@"
+class C
+{
+    void M()
+    {
+        const float x = 1;
+
+        if ([|!(x <= 1f)|]) { }
+    }
+}
+", @"
+class C
+{
+    void M()
+    {
+        const float x = 1;
+
+        if (x > 1f) { }
+    }
+}
+");
+        }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.SimplifyLogicalNegation)]
+        public async Task Test_LessThanOrEqualsExpression_Double()
+        {
+            await VerifyDiagnosticAndFixAsync(@"
+class C
+{
+    void M()
+    {
+        const double x = 1;
+
+        if ([|!(x <= 1d)|]) { }
+    }
+}
+", @"
+class C
+{
+    void M()
+    {
+        const double x = 1;
+
+        if (x > 1d) { }
+    }
+}
+");
+        }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.SimplifyLogicalNegation)]
+        public async Task Test_GreaterThanExpression_Int32()
+        {
+            await VerifyDiagnosticAndFixAsync(@"
+class C
+{
+    void M()
+    {
+        int x = 1, y = 2;
+
+        if ([|!(x > y)|]) { }
+    }
+}
+", @"
+class C
+{
+    void M()
+    {
+        int x = 1, y = 2;
+
+        if (x <= y) { }
+    }
+}
+");
+        }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.SimplifyLogicalNegation)]
+        public async Task Test_GreaterThanExpression_Single()
+        {
+            await VerifyDiagnosticAndFixAsync(@"
+class C
+{
+    void M()
+    {
+        const float x = 1;
+
+        if ([|!(x > 1f)|]) { }
+    }
+}
+", @"
+class C
+{
+    void M()
+    {
+        const float x = 1;
+
+        if (x <= 1f) { }
+    }
+}
+");
+        }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.SimplifyLogicalNegation)]
+        public async Task Test_GreaterThanExpression_Double()
+        {
+            await VerifyDiagnosticAndFixAsync(@"
+class C
+{
+    void M()
+    {
+        const double x = 1;
+
+        if ([|!(x > 1d)|]) { }
+    }
+}
+", @"
+class C
+{
+    void M()
+    {
+        const double x = 1;
+
+        if (x <= 1d) { }
+    }
+}
+");
+        }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.SimplifyLogicalNegation)]
+        public async Task Test_GreaterThanOrEqualsExpression_Int32()
+        {
+            await VerifyDiagnosticAndFixAsync(@"
+class C
+{
+    void M()
+    {
+        int x = 1, y = 2;
+
+        if ([|!(x >= y)|]) { }
+    }
+}
+", @"
+class C
+{
+    void M()
+    {
+        int x = 1, y = 2;
+
+        if (x < y) { }
+    }
+}
+");
+        }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.SimplifyLogicalNegation)]
+        public async Task Test_GreaterThanOrEqualsExpression_Single()
+        {
+            await VerifyDiagnosticAndFixAsync(@"
+class C
+{
+    void M()
+    {
+        const float x = 1;
+
+        if ([|!(x >= 1f)|]) { }
+    }
+}
+", @"
+class C
+{
+    void M()
+    {
+        const float x = 1;
+
+        if (x < 1f) { }
+    }
+}
+");
+        }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.SimplifyLogicalNegation)]
+        public async Task Test_GreaterThanOrEqualsExpression_Double()
+        {
+            await VerifyDiagnosticAndFixAsync(@"
+class C
+{
+    void M()
+    {
+        const double x = 1;
+
+        if ([|!(x >= 1d)|]) { }
+    }
+}
+", @"
+class C
+{
+    void M()
+    {
+        const double x = 1;
+
+        if (x < 1d) { }
     }
 }
 ");
@@ -228,6 +532,44 @@ class C
     public static bool operator !=(C left, C right)
     {
         return false;
+    }
+}
+");
+        }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.SimplifyLogicalNegation)]
+        public async Task TestNoDiagnostic_Double_NaN()
+        {
+            await VerifyNoDiagnosticAsync(@"
+class C
+{
+    void M()
+    {
+        double x = double.NaN, y = 1;
+
+        if (!(x > y)) { }
+        if (!(x < y)) { }
+        if (!(x >= y)) { }
+        if (!(x >= y)) { }
+    }
+}
+");
+        }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.SimplifyLogicalNegation)]
+        public async Task TestNoDiagnostic_Float_NaN()
+        {
+            await VerifyNoDiagnosticAsync(@"
+class C
+{
+    void M()
+    {
+        float x = float.NaN, y = 1;
+
+        if (!(x > y)) { }
+        if (!(x < y)) { }
+        if (!(x >= y)) { }
+        if (!(x >= y)) { }
     }
 }
 ");

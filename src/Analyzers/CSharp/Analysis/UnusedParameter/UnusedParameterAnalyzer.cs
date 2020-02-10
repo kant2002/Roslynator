@@ -46,7 +46,7 @@ namespace Roslynator.CSharp.Analysis.UnusedParameter
             context.RegisterSyntaxNodeAction(AnalyzeAnonymousMethodExpression, SyntaxKind.AnonymousMethodExpression);
         }
 
-        public static void AnalyzeConstructorDeclaration(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeConstructorDeclaration(SyntaxNodeAnalysisContext context)
         {
             var constructorDeclaration = (ConstructorDeclarationSyntax)context.Node;
 
@@ -82,7 +82,7 @@ namespace Roslynator.CSharp.Analysis.UnusedParameter
             Analyze(context, parameterInfo);
         }
 
-        public static void AnalyzeMethodDeclaration(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeMethodDeclaration(SyntaxNodeAnalysisContext context)
         {
             var methodDeclaration = (MethodDeclarationSyntax)context.Node;
 
@@ -123,7 +123,8 @@ namespace Roslynator.CSharp.Analysis.UnusedParameter
             if (methodSymbol.ImplementsInterfaceMember(allInterfaces: true))
                 return;
 
-            UnusedParameterWalker walker = UnusedParameterWalker.GetInstance(context.SemanticModel, context.CancellationToken);
+            UnusedParameterWalker walker = UnusedParameterWalker.GetInstance();
+            walker.SetValues(context.SemanticModel, context.CancellationToken);
 
             FindUnusedNodes(parameterInfo, walker);
 
@@ -137,7 +138,7 @@ namespace Roslynator.CSharp.Analysis.UnusedParameter
             UnusedParameterWalker.Free(walker);
         }
 
-        public static void AnalyzeOperatorDeclaration(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeOperatorDeclaration(SyntaxNodeAnalysisContext context)
         {
             var operatorDeclaration = (OperatorDeclarationSyntax)context.Node;
 
@@ -155,7 +156,7 @@ namespace Roslynator.CSharp.Analysis.UnusedParameter
             Analyze(context, parameterInfo);
         }
 
-        public static void AnalyzeConversionOperatorDeclaration(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeConversionOperatorDeclaration(SyntaxNodeAnalysisContext context)
         {
             var conversionOperatorDeclaration = (ConversionOperatorDeclarationSyntax)context.Node;
 
@@ -173,7 +174,7 @@ namespace Roslynator.CSharp.Analysis.UnusedParameter
             Analyze(context, parameterInfo);
         }
 
-        public static void AnalyzeIndexerDeclaration(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeIndexerDeclaration(SyntaxNodeAnalysisContext context)
         {
             var indexerDeclaration = (IndexerDeclarationSyntax)context.Node;
 
@@ -205,7 +206,7 @@ namespace Roslynator.CSharp.Analysis.UnusedParameter
             Analyze(context, parameterInfo, isIndexer: true);
         }
 
-        public static void AnalyzeLocalFunctionStatement(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeLocalFunctionStatement(SyntaxNodeAnalysisContext context)
         {
             var localFunctionStatement = (LocalFunctionStatementSyntax)context.Node;
 
@@ -228,7 +229,7 @@ namespace Roslynator.CSharp.Analysis.UnusedParameter
             Analyze(context, parameterInfo);
         }
 
-        public static void AnalyzeSimpleLambdaExpression(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeSimpleLambdaExpression(SyntaxNodeAnalysisContext context)
         {
             var lambda = (SimpleLambdaExpressionSyntax)context.Node;
 
@@ -251,7 +252,7 @@ namespace Roslynator.CSharp.Analysis.UnusedParameter
             Analyze(context, parameterInfo);
         }
 
-        public static void AnalyzeParenthesizedLambdaExpression(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeParenthesizedLambdaExpression(SyntaxNodeAnalysisContext context)
         {
             var lambda = (ParenthesizedLambdaExpressionSyntax)context.Node;
 
@@ -274,7 +275,7 @@ namespace Roslynator.CSharp.Analysis.UnusedParameter
             Analyze(context, parameterInfo);
         }
 
-        public static void AnalyzeAnonymousMethodExpression(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeAnonymousMethodExpression(SyntaxNodeAnalysisContext context)
         {
             var anonymousMethod = (AnonymousMethodExpressionSyntax)context.Node;
 
@@ -299,7 +300,8 @@ namespace Roslynator.CSharp.Analysis.UnusedParameter
 
         private static void Analyze(SyntaxNodeAnalysisContext context, in ParameterInfo parameterInfo, bool isIndexer = false)
         {
-            UnusedParameterWalker walker = UnusedParameterWalker.GetInstance(context.SemanticModel, context.CancellationToken, isIndexer);
+            UnusedParameterWalker walker = UnusedParameterWalker.GetInstance();
+            walker.SetValues(context.SemanticModel, context.CancellationToken, isIndexer);
 
             FindUnusedNodes(parameterInfo, walker);
 

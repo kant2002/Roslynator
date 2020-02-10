@@ -510,6 +510,28 @@ namespace Roslynator.CSharp
             return false;
         }
 
+        //TODO: make CSharpFacts.IsNumericType public
+        internal static bool IsNumericType(SpecialType specialType)
+        {
+            switch (specialType)
+            {
+                case SpecialType.System_SByte:
+                case SpecialType.System_Byte:
+                case SpecialType.System_Int16:
+                case SpecialType.System_UInt16:
+                case SpecialType.System_Int32:
+                case SpecialType.System_UInt32:
+                case SpecialType.System_Int64:
+                case SpecialType.System_UInt64:
+                case SpecialType.System_Decimal:
+                case SpecialType.System_Single:
+                case SpecialType.System_Double:
+                    return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Returns true if an expression of the specified type can be used in a prefix or postfix unary operator.
         /// </summary>
@@ -844,6 +866,8 @@ namespace Roslynator.CSharp
                     return SyntaxKind.AndAssignmentExpression;
                 case SyntaxKind.ExclusiveOrExpression:
                     return SyntaxKind.ExclusiveOrAssignmentExpression;
+                case SyntaxKind.CoalesceExpression:
+                    return SyntaxKind.CoalesceAssignmentExpression;
                 default:
                     return SyntaxKind.None;
             }
@@ -873,6 +897,8 @@ namespace Roslynator.CSharp
                     return SyntaxKind.AmpersandEqualsToken;
                 case SyntaxKind.ExclusiveOrAssignmentExpression:
                     return SyntaxKind.CaretEqualsToken;
+                case SyntaxKind.CoalesceAssignmentExpression:
+                    return SyntaxKind.QuestionQuestionEqualsToken;
                 default:
                     return SyntaxKind.None;
             }

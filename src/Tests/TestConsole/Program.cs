@@ -10,13 +10,9 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using Roslynator;
-using Roslynator.CSharp;
-using Roslynator.CSharp.Syntax;
-using Roslynator.CSharp.Tests;
 #endregion usings
 
-namespace Roslynator.Tests
+namespace Roslynator.Testing
 {
     internal static class Program
     {
@@ -36,10 +32,33 @@ class C
 ";
             using (Workspace workspace = new AdhocWorkspace())
             {
-                Project project = CSharpWorkspaceFactory.Instance.AddProject(workspace.CurrentSolution);
+                IEnumerable<PortableExecutableReference> metadataReferences = AppContext
+                    .GetData("TRUSTED_PLATFORM_ASSEMBLIES")
+                    .ToString()
+                    .Split(';')
+                    .Select(f => MetadataReference.CreateFromFile(f));
 
-                Document document = CSharpWorkspaceFactory.Instance.AddDocument(project, source);
+                Project project = workspace.CurrentSolution
+                    .AddProject("Test", "Test", LanguageNames.CSharp)
+                    .WithMetadataReferences(metadataReferences);
 
+                var compilationOptions = ((CSharpCompilationOptions)project.CompilationOptions);
+
+                compilationOptions = ((CSharpCompilationOptions)project.CompilationOptions)
+                    .WithAllowUnsafe(true)
+                    .WithOutputKind(OutputKind.DynamicallyLinkedLibrary);
+
+                var parseOptions = ((CSharpParseOptions)project.ParseOptions);
+
+                parseOptions = parseOptions
+                    .WithLanguageVersion(LanguageVersion.CSharp8)
+                    .WithPreprocessorSymbols(parseOptions.PreprocessorSymbolNames.Concat(new string[] { "DEBUG" }));
+
+                project = project
+                    .WithCompilationOptions(compilationOptions)
+                    .WithParseOptions(parseOptions);
+
+                Document document = project.AddDocument("Document", SourceText.From(source));
                 SemanticModel semanticModel = await document.GetSemanticModelAsync().ConfigureAwait(false);
                 SyntaxTree tree = await document.GetSyntaxTreeAsync().ConfigureAwait(false);
                 SyntaxNode root = await tree.GetRootAsync().ConfigureAwait(false);

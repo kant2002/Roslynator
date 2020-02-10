@@ -269,8 +269,8 @@ namespace Roslynator.Documentation
                             return t;
 
                         t = t.BaseType;
-                    }
-                    while (t != null);
+
+                    } while (t != null);
                 }
 
                 return null;

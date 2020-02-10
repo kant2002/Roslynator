@@ -118,14 +118,16 @@ namespace Roslynator.CommandLine.Xml
                     yield return new XElement("Fixer",
                         new XAttribute("Name", type.FullName),
                         new XElement("Languages", attribute.Languages.Select(f => new XElement("Language", f))),
-                        new XElement("FixableDiagnostics", fixer.FixableDiagnosticIds
+                        new XElement(
+                            "FixableDiagnostics",
+                            fixer.FixableDiagnosticIds
                             .Distinct()
                             .OrderBy(f => f)
                             .Select(f => new XElement("Id", f))),
                         CreateFixAllProviderElement(fixer));
                 }
 
-                XElement CreateFixAllProviderElement(CodeFixProvider fixer)
+                static XElement CreateFixAllProviderElement(CodeFixProvider fixer)
                 {
                     FixAllProvider fixAllProvider = fixer.GetFixAllProvider();
 

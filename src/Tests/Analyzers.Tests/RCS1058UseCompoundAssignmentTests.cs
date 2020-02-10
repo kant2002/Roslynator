@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Roslynator.CSharp.CodeFixes;
+using Roslynator.CSharp.Testing;
 using Xunit;
 
 namespace Roslynator.CSharp.Analysis.Tests
@@ -55,7 +56,7 @@ class C
         [InlineData("i = i | 1", "i |= 1")]
         [InlineData("i = i & 1", "i &= 1")]
         [InlineData("i = i ^ 1", "i ^= 1")]
-        public async Task Test(string fromData, string toData)
+        public async Task Test(string source, string expected)
         {
             await VerifyDiagnosticAndFixAsync(@"
 class C
@@ -65,7 +66,29 @@ class C
         [||];
     }
 }
-", fromData, toData);
+", source, expected);
+        }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.UseCompoundAssignment)]
+        public async Task Test_CoalesceExpression()
+        {
+            await VerifyDiagnosticAndFixAsync(@"
+class C
+{
+    void M(string s)
+    {
+        [|s = s ?? """"|];
+    }
+}
+", @"
+class C
+{
+    void M(string s)
+    {
+        s ??= """";
+    }
+}
+");
         }
 
         [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.UseCompoundAssignment)]
@@ -82,6 +105,20 @@ class C
     int P { get; set; }
 }
 ");
+        }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.UseCompoundAssignment)]
+        public async Task TestNoDiagnostic_CoalesceExpression_CSharp6()
+        {
+            await VerifyNoDiagnosticAsync(@"
+class C
+{
+    void M(string s)
+    {
+        s = s ?? """";
+    }
+}
+", options: CSharpCodeVerificationOptions.Default_CSharp6);
         }
     }
 }

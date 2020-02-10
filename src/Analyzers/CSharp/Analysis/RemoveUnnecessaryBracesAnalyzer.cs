@@ -47,10 +47,22 @@ namespace Roslynator.CSharp.Analysis
 
             SyntaxList<StatementSyntax> statements = block.Statements;
 
-            StatementSyntax firstStatement = statements.FirstOrDefault();
+            SyntaxList<StatementSyntax>.Enumerator en = statements.GetEnumerator();
 
-            if (firstStatement == null)
+            if (!en.MoveNext())
                 return;
+
+            do
+            {
+                if (en.Current.IsKind(SyntaxKind.LocalDeclarationStatement))
+                {
+                    var localDeclaration = (LocalDeclarationStatementSyntax)en.Current;
+
+                    if (localDeclaration.UsingKeyword.IsKind(SyntaxKind.UsingKeyword))
+                        return;
+                }
+
+            } while (en.MoveNext());
 
             SyntaxToken openBrace = block.OpenBraceToken;
 
@@ -60,12 +72,10 @@ namespace Roslynator.CSharp.Analysis
             if (!AnalyzeTrivia(openBrace.TrailingTrivia))
                 return;
 
-            if (!AnalyzeTrivia(firstStatement.GetLeadingTrivia()))
+            if (!AnalyzeTrivia(statements[0].GetLeadingTrivia()))
                 return;
 
-            StatementSyntax lastStatement = statements.Last();
-
-            if (!AnalyzeTrivia(lastStatement.GetTrailingTrivia()))
+            if (!AnalyzeTrivia(statements.Last().GetTrailingTrivia()))
                 return;
 
             SyntaxToken closeBrace = block.CloseBraceToken;
@@ -79,7 +89,7 @@ namespace Roslynator.CSharp.Analysis
             DiagnosticHelpers.ReportDiagnostic(context, DiagnosticDescriptors.RemoveUnnecessaryBraces, openBrace);
             DiagnosticHelpers.ReportDiagnostic(context, DiagnosticDescriptors.RemoveUnnecessaryBracesFadeOut, closeBrace);
 
-            bool AnalyzeTrivia(SyntaxTriviaList trivia)
+            static bool AnalyzeTrivia(SyntaxTriviaList trivia)
             {
                 return trivia.All(f => f.IsKind(SyntaxKind.WhitespaceTrivia, SyntaxKind.EndOfLineTrivia, SyntaxKind.SingleLineCommentTrivia));
             }

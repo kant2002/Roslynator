@@ -392,8 +392,8 @@ namespace Roslynator.Documentation
                 do
                 {
                     WriteTypeHierarchyItem(en.Current, cancellationToken);
-                }
-                while (en.MoveNext());
+
+                } while (en.MoveNext());
 
                 WriteEndHierarchyTypes();
                 WriteEndType(symbol);
@@ -999,7 +999,7 @@ namespace Roslynator.Documentation
             int max = startIndex + length;
 
             int i = startIndex;
-            int j = 0;
+            int j;
 
             while (i < max)
             {

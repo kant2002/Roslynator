@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,26 +6,12 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <LangVersion>latest</LangVersion>
-    <CodeAnalysisRuleSet>..\..\global.ruleset</CodeAnalysisRuleSet>
-    <AssemblyName>Roslynator.Tests.TestConsole</AssemblyName>
-    <RootNamespace>Roslynator.Tests.TestConsole</RootNamespace>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\Roslynator.snk</AssemblyOriginatorKeyFile>
+    <AssemblyName>Roslynator.Testing.Console</AssemblyName>
+    <RootNamespace>Roslynator.Testing</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="2.8.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\CSharp.Workspaces\CSharp.Workspaces.csproj" />
-    <ProjectReference Include="..\TestFramework.CSharp\TestFramework.CSharp.csproj" />
-    <ProjectReference Include="..\TestFramework.Core\TestFramework.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="Tests.TestConsole.snk" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.4.0" />
   </ItemGroup>
 
 </Project>

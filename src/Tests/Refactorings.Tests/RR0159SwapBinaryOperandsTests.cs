@@ -18,7 +18,7 @@ namespace Roslynator.CSharp.Refactorings.Tests
         [InlineData("i >[||]= j", "j <= i")]
         [InlineData("i [||]< j", "j > i")]
         [InlineData("i <[||]= j", "j >= i")]
-        public async Task Test(string fromData, string toData)
+        public async Task Test(string source, string expected)
         {
             await VerifyRefactoringAsync(@"
 class C
@@ -33,13 +33,13 @@ class C
         if ([||]) { }
     }
 }
-", fromData, toData, equivalenceKey: RefactoringId);
+", source, expected, equivalenceKey: RefactoringId);
         }
 
         [Theory, Trait(Traits.Refactoring, RefactoringIdentifiers.SwapBinaryOperands)]
         [InlineData("i [||]+ j", "j + i")]
         [InlineData("i [||]* j", "j * i")]
-        public async Task Test_AddMultiply(string fromData, string toData)
+        public async Task Test_AddMultiply(string source, string expected)
         {
             await VerifyRefactoringAsync(@"
 class C
@@ -49,7 +49,73 @@ class C
         int k = [||];
     }
 }
-", fromData, toData, equivalenceKey: RefactoringId);
+", source, expected, equivalenceKey: RefactoringId);
+        }
+
+        [Fact, Trait(Traits.Refactoring, RefactoringIdentifiers.SwapBinaryOperands)]
+        public async Task Test_BitwiseAnd()
+        {
+            await VerifyRefactoringAsync(@"
+class C
+{
+    void M(bool f1, bool f2)
+    {
+        bool f = f1 [||]& f2;
+    }
+}
+", @"
+class C
+{
+    void M(bool f1, bool f2)
+    {
+        bool f = f2 & f1;
+    }
+}
+", equivalenceKey: RefactoringId);
+        }
+
+        [Fact, Trait(Traits.Refactoring, RefactoringIdentifiers.SwapBinaryOperands)]
+        public async Task Test_BitwiseOr()
+        {
+            await VerifyRefactoringAsync(@"
+class C
+{
+    void M(bool f1, bool f2)
+    {
+        bool f = f1 [||]| f2;
+    }
+}
+", @"
+class C
+{
+    void M(bool f1, bool f2)
+    {
+        bool f = f2 | f1;
+    }
+}
+", equivalenceKey: RefactoringId);
+        }
+
+        [Fact, Trait(Traits.Refactoring, RefactoringIdentifiers.SwapBinaryOperands)]
+        public async Task Test_ExclusiveOr()
+        {
+            await VerifyRefactoringAsync(@"
+class C
+{
+    void M(bool f1, bool f2)
+    {
+        bool f = f1 [||]^ f2;
+    }
+}
+", @"
+class C
+{
+    void M(bool f1, bool f2)
+    {
+        bool f = f2 ^ f1;
+    }
+}
+", equivalenceKey: RefactoringId);
         }
 
         [Fact, Trait(Traits.Refactoring, RefactoringIdentifiers.SwapBinaryOperands)]

@@ -43,7 +43,8 @@ namespace Roslynator.CodeGeneration.CSharp
                         SimpleMemberAccessExpression(
                             SimpleMemberAccessExpression(
                                 IdentifierName("propertySymbol"),
-                                IdentifierName("ContainingType")), IdentifierName("Name")),
+                                IdentifierName("ContainingType")),
+                            IdentifierName("Name")),
                         GenerateSections().ToSyntaxList().Add(DefaultSwitchSection(Block(ThrowNewInvalidOperationException(ParseExpression(@"$""Unrecognized type '{propertySymbol.ContainingType.Name}'"""))))))));
 
             IEnumerable<SwitchSectionSyntax> GenerateSections()
@@ -72,7 +73,7 @@ namespace Roslynator.CodeGeneration.CSharp
 
                     Debug.Assert(sections.Any());
 
-                    sections = sections.Add(DefaultSwitchSection(ThrowNewInvalidOperationException(ParseExpression(@"$""Unrecognized property '{propertySymbol.Name}'"""))));
+                    sections = sections.Add(DefaultSwitchSection(ThrowNewInvalidOperationException(ParseExpression(@"$""Unrecognized property '{propertySymbol.ContainingType.Name}.{propertySymbol.Name}'"""))));
 
                     yield return SwitchSection(
                         CaseSwitchLabel(StringLiteralExpression(typeSymbol.Name)),
@@ -82,7 +83,7 @@ namespace Roslynator.CodeGeneration.CSharp
                                 sections)));
                 }
 
-                IEnumerable<SwitchLabelSyntax> GenerateLabels(IEnumerable<IPropertySymbol> propertySymbols)
+                static IEnumerable<SwitchLabelSyntax> GenerateLabels(IEnumerable<IPropertySymbol> propertySymbols)
                 {
                     foreach (IPropertySymbol propertySymbol in propertySymbols)
                     {

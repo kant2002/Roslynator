@@ -227,8 +227,8 @@ namespace Roslynator.CommandLine
                     do
                     {
                         WriteLine($"  {en.Current.MSBuildPath}", Verbosity.Quiet);
-                    }
-                    while (en.MoveNext());
+
+                    } while (en.MoveNext());
 
                     WriteLine($"Use option '--{ParameterNames.MSBuildPath}' to specify MSBuild location", Verbosity.Quiet);
                     instance = null;
@@ -347,7 +347,7 @@ namespace Roslynator.CommandLine
 
             return solutionPath ?? projectPath;
 
-            string FindFile(IEnumerable<string> files, string errorMessage)
+            static string FindFile(IEnumerable<string> files, string errorMessage)
             {
                 using (IEnumerator<string> en = files.GetEnumerator())
                 {

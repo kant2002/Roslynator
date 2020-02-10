@@ -1280,8 +1280,8 @@ namespace Roslynator
                     break;
 
                 typeSymbol = typeSymbol.BaseType;
-            }
-            while (typeSymbol != null);
+
+            } while (typeSymbol != null);
 
             return default;
         }
@@ -1388,8 +1388,8 @@ namespace Roslynator
                     break;
 
                 typeSymbol = typeSymbol.BaseType;
-            }
-            while (typeSymbol != null);
+
+            } while (typeSymbol != null);
 
             return null;
         }
@@ -1656,7 +1656,7 @@ namespace Roslynator
 
             return false;
 
-            bool SupportsExplicitDeclaration2(ImmutableArray<ITypeSymbol> typeSymbols)
+            static bool SupportsExplicitDeclaration2(ImmutableArray<ITypeSymbol> typeSymbols)
             {
                 foreach (ITypeSymbol symbol in typeSymbols)
                 {

@@ -4,7 +4,7 @@ using System;
 using Microsoft.CodeAnalysis.CSharp;
 using Xunit;
 
-namespace Roslynator.CSharp.Tests
+namespace Roslynator.CSharp.Testing
 {
     public static class SyntaxKindTests
     {
@@ -501,6 +501,27 @@ namespace Roslynator.CSharp.Tests
                     case SyntaxKind.RefExpression:
                     case SyntaxKind.RefType:
                     case SyntaxKind.ThrowExpression:
+                    case SyntaxKind.ImplicitStackAllocArrayCreationExpression:
+                    // new in 3.0.0
+                    case SyntaxKind.DotDotToken:
+                    case SyntaxKind.QuestionQuestionEqualsToken:
+                    case SyntaxKind.NullableKeyword:
+                    case SyntaxKind.EnableKeyword:
+                    case SyntaxKind.SafeOnlyKeyword:
+                    case SyntaxKind.VarKeyword:
+                    case SyntaxKind.RangeExpression:
+                    case SyntaxKind.CoalesceAssignmentExpression:
+                    case SyntaxKind.IndexExpression:
+                    case SyntaxKind.RecursivePattern:
+                    case SyntaxKind.PropertyPatternClause:
+                    case SyntaxKind.Subpattern:
+                    case SyntaxKind.PositionalPatternClause:
+                    case SyntaxKind.DiscardPattern:
+                    case SyntaxKind.SwitchExpression:
+                    case SyntaxKind.SwitchExpressionArm:
+                    case SyntaxKind.VarPattern:
+                    case SyntaxKind.SuppressNullableWarningExpression:
+                    case SyntaxKind.NullableDirectiveTrivia:
                         {
                             break;
                         }

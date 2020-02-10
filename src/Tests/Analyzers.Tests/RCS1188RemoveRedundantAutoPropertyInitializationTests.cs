@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Roslynator.CSharp.CodeFixes;
-using Roslynator.CSharp.Tests;
+using Roslynator.CSharp.Testing;
 using Xunit;
 
 namespace Roslynator.CSharp.Analysis.Tests
@@ -208,6 +208,17 @@ class C
     string P { get; }
 }
 ");
+        }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.RemoveRedundantAutoPropertyInitialization)]
+        public async Task TestNoDiagnostic_SuppressNullableWarningExpression()
+        {
+            await VerifyNoDiagnosticAsync(@"
+class C
+{
+    string P { get; } = null!;
+}
+", options: CSharpCodeVerificationOptions.Default.WithParseOptions(CSharpCodeVerificationOptions.Default.ParseOptions.WithLanguageVersion(LanguageVersion.Preview)));
         }
     }
 }
