@@ -29,7 +29,7 @@ namespace Roslynator.CSharp.Analysis
             context.RegisterSyntaxNodeAction(AnalyzeEnumDeclaration, SyntaxKind.EnumDeclaration);
         }
 
-        public static void AnalyzeEnumDeclaration(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeEnumDeclaration(SyntaxNodeAnalysisContext context)
         {
             var enumDeclaration = (EnumDeclarationSyntax)context.Node;
 
@@ -50,7 +50,7 @@ namespace Roslynator.CSharp.Analysis
 
             if (count > 1)
             {
-                IFieldSymbol firstField = semanticModel.GetDeclaredSymbol(members.First(), cancellationToken);
+                IFieldSymbol firstField = semanticModel.GetDeclaredSymbol(members[0], cancellationToken);
 
                 if (firstField?.HasConstantValue == true)
                 {

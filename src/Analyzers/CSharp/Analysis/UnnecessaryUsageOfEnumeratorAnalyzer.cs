@@ -29,7 +29,7 @@ namespace Roslynator.CSharp.Analysis
             context.RegisterSyntaxNodeAction(AnalyzeUsingStatement, SyntaxKind.UsingStatement);
         }
 
-        public static void AnalyzeUsingStatement(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeUsingStatement(SyntaxNodeAnalysisContext context)
         {
             var usingStatement = (UsingStatementSyntax)context.Node;
 
@@ -73,8 +73,6 @@ namespace Roslynator.CSharp.Analysis
             walker.Visit(whileStatement.Statement);
 
             bool? isFixable = walker.IsFixable;
-
-            walker.SetValues(default(VariableDeclaratorSyntax), default(SemanticModel), default(CancellationToken));
 
             UnnecessaryUsageOfEnumeratorWalker.Free(walker);
 

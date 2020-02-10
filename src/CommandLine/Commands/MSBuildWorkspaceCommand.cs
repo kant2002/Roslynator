@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Locator;
@@ -54,6 +55,19 @@ namespace Roslynator.CommandLine
 
                 try
                 {
+                    if (string.IsNullOrEmpty(path))
+                    {
+                        path = FindProjectOrSolutionFile(Environment.CurrentDirectory);
+                    }
+                    else
+                    {
+                        if (!Path.IsPathRooted(path))
+                            path = Path.GetFullPath(path);
+
+                        if (!File.Exists(path))
+                            throw new FileNotFoundException($"Project or solution file not found: {path}");
+                    }
+
                     CommandResult result = await ExecuteAsync(path, workspace, ConsoleProgressReporter.Default, cancellationToken);
 
                     if (result.Kind != CommandResultKind.None)
@@ -61,7 +75,7 @@ namespace Roslynator.CommandLine
 
                     ProjectOrSolution projectOrSolution = await OpenProjectOrSolutionAsync(path, workspace, ConsoleProgressReporter.Default, cancellationToken);
 
-                    if (projectOrSolution != default)
+                    if (!projectOrSolution.IsDefault)
                     {
                         Solution solution = projectOrSolution.AsSolution();
 
@@ -134,7 +148,7 @@ namespace Roslynator.CommandLine
             return Task.FromResult(default(CommandResult));
         }
 
-        protected virtual async Task<ProjectOrSolution> OpenProjectOrSolutionAsync(
+        private async Task<ProjectOrSolution> OpenProjectOrSolutionAsync(
             string path,
             MSBuildWorkspace workspace,
             IProgress<ProjectLoadProgress> progress = null,
@@ -144,36 +158,20 @@ namespace Roslynator.CommandLine
 
             WriteLine($"Load {((isSolution) ? "solution" : "project")} '{path}'", Verbosity.Minimal);
 
-            try
+            ProjectOrSolution projectOrSolution;
+
+            if (isSolution)
             {
-                ProjectOrSolution projectOrSolution;
-
-                if (isSolution)
-                {
-                    projectOrSolution = await workspace.OpenSolutionAsync(path, progress, cancellationToken);
-                }
-                else
-                {
-                    projectOrSolution = await workspace.OpenProjectAsync(path, progress, cancellationToken);
-                }
-
-                WriteLine($"Done loading {((projectOrSolution.IsSolution) ? "solution" : "project")} '{projectOrSolution.FilePath}'", Verbosity.Minimal);
-
-                return projectOrSolution;
+                projectOrSolution = await workspace.OpenSolutionAsync(path, progress, cancellationToken);
             }
-            catch (Exception ex)
+            else
             {
-                if (ex is FileNotFoundException
-                    || ex is InvalidOperationException)
-                {
-                    WriteLine(ex.ToString(), Verbosity.Quiet);
-                    return default;
-                }
-                else
-                {
-                    throw;
-                }
+                projectOrSolution = await workspace.OpenProjectAsync(path, progress, cancellationToken);
             }
+
+            WriteLine($"Done loading {((projectOrSolution.IsSolution) ? "solution" : "project")} '{projectOrSolution.FilePath}'", Verbosity.Minimal);
+
+            return projectOrSolution;
         }
 
         private static MSBuildWorkspace CreateMSBuildWorkspace(string msbuildPath, IEnumerable<string> rawProperties)
@@ -229,8 +227,8 @@ namespace Roslynator.CommandLine
                     do
                     {
                         WriteLine($"  {en.Current.MSBuildPath}", Verbosity.Quiet);
-                    }
-                    while (en.MoveNext());
+
+                    } while (en.MoveNext());
 
                     WriteLine($"Use option '--{ParameterNames.MSBuildPath}' to specify MSBuild location", Verbosity.Quiet);
                     instance = null;
@@ -239,6 +237,21 @@ namespace Roslynator.CommandLine
 
                 instance = firstInstance;
                 return true;
+            }
+        }
+
+        private protected IEnumerable<Project> FilterProjects(
+            ProjectOrSolution projectOrSolution,
+            Func<Solution, ImmutableArray<ProjectId>> getProjects = null)
+        {
+            if (projectOrSolution.IsProject)
+            {
+                yield return projectOrSolution.AsProject();
+            }
+            else if (projectOrSolution.IsSolution)
+            {
+                foreach (Project project in FilterProjects(projectOrSolution.AsSolution(), getProjects))
+                    yield return project;
             }
         }
 
@@ -267,8 +280,6 @@ namespace Roslynator.CommandLine
             ProjectOrSolution projectOrSolution,
             CancellationToken cancellationToken)
         {
-            ImmutableArray<Compilation>.Builder compilations = ImmutableArray.CreateBuilder<Compilation>();
-
             if (projectOrSolution.IsProject)
             {
                 Project project = projectOrSolution.AsProject();
@@ -277,10 +288,12 @@ namespace Roslynator.CommandLine
 
                 Compilation compilation = await project.GetCompilationAsync(cancellationToken);
 
-                compilations.Add(compilation);
+                return ImmutableArray.Create(compilation);
             }
             else
             {
+                ImmutableArray<Compilation>.Builder compilations = ImmutableArray.CreateBuilder<Compilation>();
+
                 Solution solution = projectOrSolution.AsSolution();
 
                 WriteLine($"Compile solution '{solution.FilePath}'", Verbosity.Minimal);
@@ -304,9 +317,55 @@ namespace Roslynator.CommandLine
                 stopwatch.Stop();
 
                 WriteLine($"Done compiling solution '{solution.FilePath}' in {stopwatch.Elapsed:mm\\:ss\\.ff}", Verbosity.Minimal);
+
+                return compilations.ToImmutableArray();
+            }
+        }
+
+        public static string FindProjectOrSolutionFile(string directoryPath)
+        {
+            string solutionPath = FindFile(
+                Directory.EnumerateFiles(directoryPath, "*.sln", SearchOption.TopDirectoryOnly),
+                $"Multiple MSBuild solution files found in '{directoryPath}'");
+
+            string projectPath = FindFile(
+                Directory.EnumerateFiles(directoryPath, "*.*proj", SearchOption.TopDirectoryOnly)
+                    .Where(f => !string.Equals(".xproj", Path.GetExtension(f), StringComparison.OrdinalIgnoreCase)),
+                $"Multiple MSBuild projects files found in '{directoryPath}'");
+
+            if (solutionPath != null
+                && projectPath != null)
+            {
+                throw new FileNotFoundException($"Both MSBuild project file and solution file found in '{directoryPath}'");
             }
 
-            return compilations.ToImmutableArray();
+            if (solutionPath == null
+                && projectPath == null)
+            {
+                throw new FileNotFoundException($"Could not find MSBuild project or solution file in '{directoryPath}'");
+            }
+
+            return solutionPath ?? projectPath;
+
+            static string FindFile(IEnumerable<string> files, string errorMessage)
+            {
+                using (IEnumerator<string> en = files.GetEnumerator())
+                {
+                    if (en.MoveNext())
+                    {
+                        string file = en.Current;
+
+                        if (en.MoveNext())
+                            throw new FileNotFoundException(errorMessage);
+
+                        return file;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+            }
         }
 
         protected class ConsoleProgressReporter : IProgress<ProjectLoadProgress>

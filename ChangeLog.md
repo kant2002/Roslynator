@@ -1,3 +1,51 @@
+### 2.3.1 (2020-01-20)
+
+* Last release of package Roslynator.Analyzers (2.3.0) that references Roslyn 2.x (VS 2017)
+
+### 2.3.0 (2019-12-28)
+
+* Last release of Roslynator for VS 2017
+
+### 2.2.1 (2019-10-26)
+
+* Add set of formatting analyzers (RCS0...).
+
+### 2.2.0 (2019-09-28)
+
+#### Analyzers
+
+* Disable analyzer [FormatBinaryOperatorOnNextLine](http://github.com/JosefPihrt/Roslynator/blob/master/docs/analyzers/RCS1029.md) by default.
+
+### 2.1.3 (2019-08-06)
+
+#### Analyzers
+
+* Publish package [Roslynator.CodeAnalysis.Analyzers 1.0.0-beta](https://www.nuget.org/packages/Roslynator.CodeAnalysis.Analyzers/1.0.0-beta)
+
+* Add analyzer [UseExceptionFilter](http://github.com/JosefPihrt/Roslynator/blob/master/docs/analyzers/RCS1236.md) (RCS1236).
+* Add analyzer [UseBitShiftOperator](http://github.com/JosefPihrt/Roslynator/blob/master/docs/analyzers/RCS1237.md) (RCS1237).
+* Add analyzer [AvoidNestedConditionalOperators](http://github.com/JosefPihrt/Roslynator/blob/master/docs/analyzers/RCS1238.md) (RCS1238).
+* Add analyzer [UseForStatementInsteadOfWhileStatement](http://github.com/JosefPihrt/Roslynator/blob/master/docs/analyzers/RCS1239.md) (RCS1239).
+* Add analyzer [UnnecessaryOperator](http://github.com/JosefPihrt/Roslynator/blob/master/docs/analyzers/RCS1240.md) (RCS1240).
+* Add analyzer [ImplementNonGenericCounterpart](http://github.com/JosefPihrt/Roslynator/blob/master/docs/analyzers/RCS1241.md) (RCS1241).
+
+#### Refactorings
+
+* Add refactoring [AddParameterToInterfaceMember](http://github.com/JosefPihrt/Roslynator/blob/master/docs/refactorings/RR0213.md)  (RR0213)
+
+### 2.1.1 (2019-05-13)
+
+#### Analyzers
+
+* Add analyzer [OptimizeMethodCall](http://github.com/JosefPihrt/Roslynator/blob/master/docs/analyzers/RCS1235.md) (RCS1235).
+  * Incorporate RCS1150 and RCS1178 into RCS1235.
+* Enable by default analyzer [FormatEmptyBlock](http://github.com/JosefPihrt/Roslynator/blob/master/docs/analyzers/RCS1023.md) (RCS1023) and change default severity to 'Hidden'.
+* Change default severity of analyzer [ParameterNameDiffersFromBaseName](http://github.com/JosefPihrt/Roslynator/blob/master/docs/analyzers/RCS1168.md) (RCS1168) to 'Hidden'.
+
+#### Refactorings
+
+* Add refactoring [DuplicateSwitchSection](http://github.com/JosefPihrt/Roslynator/blob/master/docs/refactorings/RR0212.md)  (RR0212)
+
 ### 2.1.0 (2019-03-25)
 
 * Export/import Visual Studio options.

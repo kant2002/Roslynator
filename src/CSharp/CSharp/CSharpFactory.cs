@@ -210,7 +210,6 @@ namespace Roslynator.CSharp
         /// Creates a list of modifiers from the specified accessibility.
         /// </summary>
         /// <param name="accessibility"></param>
-        /// <returns></returns>
         public static SyntaxTokenList TokenList(Accessibility accessibility)
         {
             switch (accessibility)
@@ -1114,6 +1113,20 @@ namespace Roslynator.CSharp
         internal static ThrowStatementSyntax ThrowNewStatement(TypeSyntax exceptionType)
         {
             return ThrowStatement(ObjectCreationExpression(exceptionType, ArgumentList()));
+        }
+
+        public static ForStatementSyntax ForStatement(
+            VariableDeclarationSyntax declaration,
+            ExpressionSyntax condition,
+            ExpressionSyntax incrementor,
+            StatementSyntax statement)
+        {
+            return SyntaxFactory.ForStatement(
+                declaration: declaration,
+                initializers: default(SeparatedSyntaxList<ExpressionSyntax>),
+                condition: condition,
+                incrementors: SingletonSeparatedList(incrementor),
+                statement: statement);
         }
         #endregion Statement
 
@@ -2052,27 +2065,19 @@ namespace Roslynator.CSharp
         internal static bool AreEquivalent(
             SyntaxNode node1,
             SyntaxNode node2,
-            bool disregardTrivia = true,
             bool topLevel = false)
         {
-            if (disregardTrivia)
-                return SyntaxFactory.AreEquivalent(node1, node2, topLevel: topLevel);
-
-            if (node1 == null)
-                return node2 == null;
-
-            return node1.IsEquivalentTo(node2, topLevel: topLevel);
+            return SyntaxFactory.AreEquivalent(node1, node2, topLevel: topLevel);
         }
 
         internal static bool AreEquivalent(
             SyntaxNode node1,
             SyntaxNode node2,
             SyntaxNode node3,
-            bool disregardTrivia = true,
             bool topLevel = false)
         {
-            return AreEquivalent(node1, node2, disregardTrivia: disregardTrivia, topLevel: topLevel)
-                && AreEquivalent(node1, node3, disregardTrivia: disregardTrivia, topLevel: topLevel);
+            return AreEquivalent(node1, node2, topLevel: topLevel)
+                && AreEquivalent(node1, node3, topLevel: topLevel);
         }
     }
 }

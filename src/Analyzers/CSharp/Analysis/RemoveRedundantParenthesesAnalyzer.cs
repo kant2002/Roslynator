@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Immutable;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -126,15 +127,18 @@ namespace Roslynator.CSharp.Analysis
                     }
                 case SyntaxKind.LogicalNotExpression:
                     {
-                        if (expression.Kind().Is(
-                          SyntaxKind.IdentifierName,
-                          SyntaxKind.GenericName,
-                          SyntaxKind.InvocationExpression,
-                          SyntaxKind.SimpleMemberAccessExpression,
-                          SyntaxKind.ElementAccessExpression,
-                          SyntaxKind.ConditionalAccessExpression))
+                        switch (expression.Kind())
                         {
-                            ReportDiagnostic();
+                            case SyntaxKind.IdentifierName:
+                            case SyntaxKind.GenericName:
+                            case SyntaxKind.InvocationExpression:
+                            case SyntaxKind.SimpleMemberAccessExpression:
+                            case SyntaxKind.ElementAccessExpression:
+                            case SyntaxKind.ConditionalAccessExpression:
+                                {
+                                    ReportDiagnostic();
+                                    break;
+                                }
                         }
 
                         break;
@@ -165,7 +169,8 @@ namespace Roslynator.CSharp.Analysis
                     }
                 case SyntaxKind.Interpolation:
                     {
-                        if (expression.Kind() != SyntaxKind.ConditionalExpression
+                        if (!expression.IsKind(SyntaxKind.ConditionalExpression)
+                            && !expression.DescendantNodes().Any(f => f.IsKind(SyntaxKind.AliasQualifiedName))
                             && ((InterpolationSyntax)parent).Expression == parenthesizedExpression)
                         {
                             ReportDiagnostic();

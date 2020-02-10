@@ -17,10 +17,10 @@ namespace Roslynator.Documentation
             string preferredCultureName = null,
             string rootDirectoryUrl = null,
             int maxDerivedTypes = DefaultValues.MaxDerivedTypes,
-            bool includeClassHierarchy = DefaultValues.IncludeClassHierarchy,
+            bool includeSystemNamespace = DefaultValues.IncludeSystemNamespace,
             bool placeSystemNamespaceFirst = DefaultValues.PlaceSystemNamespaceFirst,
-            bool formatDeclarationBaseList = DefaultValues.FormatDeclarationBaseList,
-            bool formatDeclarationConstraints = DefaultValues.FormatDeclarationConstraints,
+            bool wrapDeclarationBaseTypes = DefaultValues.FormatDeclarationBaseList,
+            bool wrapDeclarationConstraints = DefaultValues.FormatDeclarationConstraints,
             bool markObsolete = DefaultValues.MarkObsolete,
             bool includeMemberInheritedFrom = DefaultValues.IncludeMemberInheritedFrom,
             bool includeMemberOverrides = DefaultValues.IncludeMemberOverrides,
@@ -37,7 +37,7 @@ namespace Roslynator.Documentation
             NamespaceDocumentationParts ignoredNamespaceParts = NamespaceDocumentationParts.None,
             TypeDocumentationParts ignoredTypeParts = TypeDocumentationParts.None,
             MemberDocumentationParts ignoredMemberParts = MemberDocumentationParts.None,
-            OmitContainingNamespaceParts omitContainingNamespaceParts = OmitContainingNamespaceParts.None,
+            IncludeContainingNamespaceFilter includeContainingNamespaceFilter = IncludeContainingNamespaceFilter.None,
             bool scrollToContent = DefaultValues.ScrollToContent)
         {
             if (maxDerivedTypes < 0)
@@ -49,10 +49,10 @@ namespace Roslynator.Documentation
             PreferredCultureName = preferredCultureName;
             RootDirectoryUrl = rootDirectoryUrl;
             MaxDerivedTypes = maxDerivedTypes;
-            IncludeClassHierarchy = includeClassHierarchy;
+            IncludeSystemNamespace = includeSystemNamespace;
             PlaceSystemNamespaceFirst = placeSystemNamespaceFirst;
-            FormatDeclarationBaseList = formatDeclarationBaseList;
-            FormatDeclarationConstraints = formatDeclarationConstraints;
+            WrapDeclarationBaseTypes = wrapDeclarationBaseTypes;
+            WrapDeclarationConstraints = wrapDeclarationConstraints;
             MarkObsolete = markObsolete;
             IncludeMemberInheritedFrom = includeMemberInheritedFrom;
             IncludeMemberOverrides = includeMemberOverrides;
@@ -69,7 +69,7 @@ namespace Roslynator.Documentation
             IgnoredNamespaceParts = ignoredNamespaceParts;
             IgnoredTypeParts = ignoredTypeParts;
             IgnoredMemberParts = ignoredMemberParts;
-            OmitContainingNamespaceParts = omitContainingNamespaceParts;
+            IncludeContainingNamespaceFilter = includeContainingNamespaceFilter;
             ScrollToContent = scrollToContent;
         }
 
@@ -85,11 +85,13 @@ namespace Roslynator.Documentation
 
         public bool IncludeClassHierarchy { get; }
 
+        public bool IncludeSystemNamespace { get; }
+
         public bool PlaceSystemNamespaceFirst { get; }
 
-        public bool FormatDeclarationBaseList { get; }
+        public bool WrapDeclarationBaseTypes { get; }
 
-        public bool FormatDeclarationConstraints { get; }
+        public bool WrapDeclarationConstraints { get; }
 
         public bool MarkObsolete { get; }
 
@@ -123,13 +125,13 @@ namespace Roslynator.Documentation
 
         public MemberDocumentationParts IgnoredMemberParts { get; }
 
-        public OmitContainingNamespaceParts OmitContainingNamespaceParts { get; }
+        public IncludeContainingNamespaceFilter IncludeContainingNamespaceFilter { get; }
 
         public bool ScrollToContent { get; }
 
-        internal bool IncludeContainingNamespace(OmitContainingNamespaceParts parts)
+        internal bool IncludeContainingNamespace(IncludeContainingNamespaceFilter filter)
         {
-            return (OmitContainingNamespaceParts & parts) == 0;
+            return (IncludeContainingNamespaceFilter & filter) == filter;
         }
 
         internal bool ShouldBeIgnored(INamedTypeSymbol typeSymbol)
@@ -164,7 +166,6 @@ namespace Roslynator.Documentation
             public const InheritanceStyle InheritanceStyle = Documentation.InheritanceStyle.Horizontal;
             public const bool IncludeAllDerivedTypes = false;
             public const bool IncludeAttributeArguments = true;
-            public const bool IncludeClassHierarchy = true;
             public const bool IncludeInheritedAttributes = true;
             public const bool IncludeInheritedInterfaceMembers = false;
             public const bool IncludeMemberConstantValue = true;
@@ -175,6 +176,7 @@ namespace Roslynator.Documentation
             public const int MaxDerivedTypes = 5;
             public const bool OmitIEnumerable = true;
             public const bool PlaceSystemNamespaceFirst = true;
+            public const bool IncludeSystemNamespace = false;
             public const bool ScrollToContent = false;
         }
     }

@@ -31,7 +31,7 @@ namespace Roslynator.CSharp.Analysis
             context.RegisterSyntaxNodeAction(AnalyzeClassDeclaration, SyntaxKind.ClassDeclaration);
         }
 
-        public static void AnalyzeClassDeclaration(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeClassDeclaration(SyntaxNodeAnalysisContext context)
         {
             var classDeclaration = (ClassDeclarationSyntax)context.Node;
 
@@ -73,10 +73,6 @@ namespace Roslynator.CSharp.Analysis
             walker.Visit(classDeclaration);
 
             bool canBeMadeStatic = walker.CanBeMadeStatic;
-
-            walker.Symbol = null;
-            walker.SemanticModel = null;
-            walker.CancellationToken = default;
 
             MakeClassStaticWalker.Free(walker);
 
@@ -178,10 +174,8 @@ namespace Roslynator.CSharp.Analysis
 
             protected override void VisitType(TypeSyntax node)
             {
-                if (node.IsKind(SyntaxKind.IdentifierName))
+                if (node is IdentifierNameSyntax identifierName)
                 {
-                    var identifierName = (IdentifierNameSyntax)node;
-
                     if (string.Equals(Symbol.Name, identifierName.Identifier.ValueText, StringComparison.Ordinal)
                         && SemanticModel
                             .GetSymbol(identifierName, CancellationToken)?
@@ -203,6 +197,10 @@ namespace Roslynator.CSharp.Analysis
 
                 if (walker != null)
                 {
+                    Debug.Assert(walker.Symbol == null);
+                    Debug.Assert(walker.SemanticModel == null);
+                    Debug.Assert(walker.CancellationToken == default);
+
                     _cachedInstance = null;
                     return walker;
                 }
@@ -212,6 +210,10 @@ namespace Roslynator.CSharp.Analysis
 
             public static void Free(MakeClassStaticWalker walker)
             {
+                walker.Symbol = null;
+                walker.SemanticModel = null;
+                walker.CancellationToken = default;
+
                 _cachedInstance = walker;
             }
         }

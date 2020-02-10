@@ -29,31 +29,36 @@ namespace Roslynator.CSharp.Analysis.UnusedMember
             base.Initialize(context);
             context.EnableConcurrentExecution();
 
-            context.RegisterSyntaxNodeAction(AnalyzeClassDeclaration, SyntaxKind.ClassDeclaration);
-            context.RegisterSyntaxNodeAction(AnalyzeStructDeclaration, SyntaxKind.StructDeclaration);
-        }
-
-        public static void AnalyzeClassDeclaration(SyntaxNodeAnalysisContext context)
-        {
-            AnalyzeTypeDeclaration(context, (TypeDeclarationSyntax)context.Node);
-        }
-
-        public static void AnalyzeStructDeclaration(SyntaxNodeAnalysisContext context)
-        {
-            AnalyzeTypeDeclaration(context, (TypeDeclarationSyntax)context.Node);
+            context.RegisterSyntaxNodeAction(AnalyzeTypeDeclaration, SyntaxKind.ClassDeclaration);
+            context.RegisterSyntaxNodeAction(AnalyzeTypeDeclaration, SyntaxKind.StructDeclaration);
         }
 
         [SuppressMessage("Simplification", "RCS1180:Inline lazy initialization.", Justification = "<Pending>")]
-        private static void AnalyzeTypeDeclaration(SyntaxNodeAnalysisContext context, TypeDeclarationSyntax typeDeclaration)
+        private static void AnalyzeTypeDeclaration(SyntaxNodeAnalysisContext context)
         {
+            var typeDeclaration = (TypeDeclarationSyntax)context.Node;
+
             if (typeDeclaration.Modifiers.Contains(SyntaxKind.PartialKeyword))
                 return;
+
+            SemanticModel semanticModel = context.SemanticModel;
+            CancellationToken cancellationToken = context.CancellationToken;
+
+            ImmutableArray<AttributeData> attributes = default;
+
+            if (typeDeclaration.IsKind(SyntaxKind.StructDeclaration))
+            {
+                INamedTypeSymbol declarationSymbol = semanticModel.GetDeclaredSymbol(typeDeclaration, cancellationToken);
+
+                attributes = declarationSymbol.GetAttributes();
+
+                if (attributes.Any(f => f.AttributeClass.HasMetadataName(MetadataNames.System_Runtime_InteropServices_StructLayoutAttribute)))
+                    return;
+            }
 
             SyntaxList<MemberDeclarationSyntax> members = typeDeclaration.Members;
 
             UnusedMemberWalker walker = null;
-            SemanticModel semanticModel = context.SemanticModel;
-            CancellationToken cancellationToken = context.CancellationToken;
 
             foreach (MemberDeclarationSyntax member in members)
             {
@@ -72,7 +77,7 @@ namespace Roslynator.CSharp.Analysis.UnusedMember
                             if (SyntaxAccessibility<DelegateDeclarationSyntax>.Instance.GetAccessibility(declaration) == Accessibility.Private)
                             {
                                 if (walker == null)
-                                    walker = UnusedMemberWalkerCache.GetInstance();
+                                    walker = UnusedMemberWalker.GetInstance();
 
                                 walker.AddDelegate(declaration.Identifier.ValueText, declaration);
                             }
@@ -87,7 +92,7 @@ namespace Roslynator.CSharp.Analysis.UnusedMember
                                 && SyntaxAccessibility<EventDeclarationSyntax>.Instance.GetAccessibility(declaration) == Accessibility.Private)
                             {
                                 if (walker == null)
-                                    walker = UnusedMemberWalkerCache.GetInstance();
+                                    walker = UnusedMemberWalker.GetInstance();
 
                                 walker.AddNode(declaration.Identifier.ValueText, declaration);
                             }
@@ -101,7 +106,7 @@ namespace Roslynator.CSharp.Analysis.UnusedMember
                             if (SyntaxAccessibility<EventFieldDeclarationSyntax>.Instance.GetAccessibility(declaration) == Accessibility.Private)
                             {
                                 if (walker == null)
-                                    walker = UnusedMemberWalkerCache.GetInstance();
+                                    walker = UnusedMemberWalker.GetInstance();
 
                                 walker.AddNodes(declaration.Declaration);
                             }
@@ -116,7 +121,7 @@ namespace Roslynator.CSharp.Analysis.UnusedMember
                             if (SyntaxAccessibility<FieldDeclarationSyntax>.Instance.GetAccessibility(declaration) == Accessibility.Private)
                             {
                                 if (walker == null)
-                                    walker = UnusedMemberWalkerCache.GetInstance();
+                                    walker = UnusedMemberWalker.GetInstance();
 
                                 walker.AddNodes(declaration.Declaration, isConst: modifiers.Contains(SyntaxKind.ConstKeyword));
                             }
@@ -138,7 +143,7 @@ namespace Roslynator.CSharp.Analysis.UnusedMember
                                 if (!IsMainMethod(declaration, modifiers, methodName))
                                 {
                                     if (walker == null)
-                                        walker = UnusedMemberWalkerCache.GetInstance();
+                                        walker = UnusedMemberWalker.GetInstance();
 
                                     walker.AddNode(methodName, declaration);
                                 }
@@ -154,7 +159,7 @@ namespace Roslynator.CSharp.Analysis.UnusedMember
                                 && SyntaxAccessibility<PropertyDeclarationSyntax>.Instance.GetAccessibility(declaration) == Accessibility.Private)
                             {
                                 if (walker == null)
-                                    walker = UnusedMemberWalkerCache.GetInstance();
+                                    walker = UnusedMemberWalker.GetInstance();
 
                                 walker.AddNode(declaration.Identifier.ValueText, declaration);
                             }
@@ -172,9 +177,11 @@ namespace Roslynator.CSharp.Analysis.UnusedMember
             if (ShouldAnalyzeDebuggerDisplayAttribute()
                 && nodes.Any(f => f.CanBeInDebuggerDisplayAttribute))
             {
-                string value = semanticModel
-                    .GetDeclaredSymbol(typeDeclaration, cancellationToken)
-                    .GetAttribute(MetadataNames.System_Diagnostics_DebuggerDisplayAttribute)?
+                if (attributes.IsDefault)
+                    attributes = semanticModel.GetDeclaredSymbol(typeDeclaration, cancellationToken).GetAttributes();
+
+                string value = attributes
+                    .FirstOrDefault(f => f.AttributeClass.HasMetadataName(MetadataNames.System_Diagnostics_DebuggerDisplayAttribute))?
                     .ConstructorArguments
                     .SingleOrDefault(shouldThrow: false)
                     .Value?
@@ -182,43 +189,20 @@ namespace Roslynator.CSharp.Analysis.UnusedMember
 
                 if (value != null)
                     RemoveMethodsAndPropertiesThatAreInDebuggerDisplayAttributeValue(value, ref nodes);
-
-                if (nodes.Count == 0)
-                {
-                    UnusedMemberWalkerCache.Free(walker);
-                    return;
-                }
             }
 
-            walker.SemanticModel = semanticModel;
-            walker.CancellationToken = cancellationToken;
-
-            walker.Visit(typeDeclaration);
-
-            foreach (NodeSymbolInfo info in nodes)
+            if (nodes.Count > 0)
             {
-                SyntaxNode node = info.Node;
+                walker.SemanticModel = semanticModel;
+                walker.CancellationToken = cancellationToken;
 
-                if (node is VariableDeclaratorSyntax variableDeclarator)
-                {
-                    var variableDeclaration = (VariableDeclarationSyntax)variableDeclarator.Parent;
+                walker.Visit(typeDeclaration);
 
-                    if (variableDeclaration.Variables.Count == 1)
-                    {
-                        ReportDiagnostic(context, variableDeclaration.Parent, CSharpFacts.GetTitle(variableDeclaration.Parent));
-                    }
-                    else
-                    {
-                        ReportDiagnostic(context, variableDeclarator, CSharpFacts.GetTitle(variableDeclaration.Parent));
-                    }
-                }
-                else
-                {
-                    ReportDiagnostic(context, node, CSharpFacts.GetTitle(node));
-                }
+                foreach (NodeSymbolInfo node in nodes)
+                    ReportDiagnostic(context, node.Node);
             }
 
-            UnusedMemberWalkerCache.Free(walker);
+            UnusedMemberWalker.Free(walker);
 
             bool ShouldAnalyzeDebuggerDisplayAttribute()
             {
@@ -318,6 +302,27 @@ namespace Roslynator.CSharp.Analysis.UnusedMember
                             break;
                         }
                 }
+            }
+        }
+
+        private static void ReportDiagnostic(SyntaxNodeAnalysisContext context, SyntaxNode node)
+        {
+            if (node is VariableDeclaratorSyntax variableDeclarator)
+            {
+                var variableDeclaration = (VariableDeclarationSyntax)variableDeclarator.Parent;
+
+                if (variableDeclaration.Variables.Count == 1)
+                {
+                    ReportDiagnostic(context, variableDeclaration.Parent, CSharpFacts.GetTitle(variableDeclaration.Parent));
+                }
+                else
+                {
+                    ReportDiagnostic(context, variableDeclarator, CSharpFacts.GetTitle(variableDeclaration.Parent));
+                }
+            }
+            else
+            {
+                ReportDiagnostic(context, node, CSharpFacts.GetTitle(node));
             }
         }
 

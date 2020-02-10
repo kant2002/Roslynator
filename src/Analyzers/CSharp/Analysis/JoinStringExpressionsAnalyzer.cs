@@ -31,7 +31,7 @@ namespace Roslynator.CSharp.Analysis
             context.RegisterSyntaxNodeAction(AnalyzeAddExpression, SyntaxKind.AddExpression);
         }
 
-        public static void AnalyzeAddExpression(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeAddExpression(SyntaxNodeAnalysisContext context)
         {
             SyntaxNode node = context.Node;
 
@@ -167,12 +167,8 @@ namespace Roslynator.CSharp.Analysis
 
         private static bool CheckHexadecimalEscapeSequence(InterpolatedStringExpressionSyntax interpolatedString)
         {
-            InterpolatedStringContentSyntax content = interpolatedString.Contents.LastOrDefault();
-
-            if (content.IsKind(SyntaxKind.InterpolatedStringText))
+            if (interpolatedString.Contents.LastOrDefault() is InterpolatedStringTextSyntax interpolatedStringText)
             {
-                var interpolatedStringText = (InterpolatedStringTextSyntax)content;
-
                 string text = interpolatedStringText.TextToken.Text;
 
                 return CheckHexadecimalEscapeSequence(text, 0, text.Length);

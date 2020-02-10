@@ -42,12 +42,10 @@ namespace Roslynator.CSharp
 
             foreach (SyntaxNode ancestor in node.Ancestors())
             {
-                switch (ancestor.Kind())
+                switch (ancestor)
                 {
-                    case SyntaxKind.NamespaceDeclaration:
+                    case NamespaceDeclarationSyntax namespaceDeclaration:
                         {
-                            var namespaceDeclaration = (NamespaceDeclarationSyntax)ancestor;
-
                             if (IsNamespace(namespaceSymbol, namespaceDeclaration.Name, semanticModel, cancellationToken)
                                 || IsNamespace(namespaceSymbol, namespaceDeclaration.Usings, semanticModel, cancellationToken))
                             {
@@ -56,10 +54,8 @@ namespace Roslynator.CSharp
 
                             break;
                         }
-                    case SyntaxKind.CompilationUnit:
+                    case CompilationUnitSyntax compilationUnit:
                         {
-                            var compilationUnit = (CompilationUnitSyntax)ancestor;
-
                             if (IsNamespace(namespaceSymbol, compilationUnit.Usings, semanticModel, cancellationToken))
                                 return true;
 
@@ -439,7 +435,7 @@ namespace Roslynator.CSharp
                 yield return e;
             }
 
-            ExpressionSyntax GetLastChild(SyntaxNode node)
+            static ExpressionSyntax GetLastChild(SyntaxNode node)
             {
                 switch (node?.Kind())
                 {
@@ -458,7 +454,7 @@ namespace Roslynator.CSharp
                 return null;
             }
 
-            SyntaxNode GetPreviousSibling(SyntaxNode node)
+            static SyntaxNode GetPreviousSibling(SyntaxNode node)
             {
                 SyntaxNode parent = node.Parent;
 
@@ -487,7 +483,7 @@ namespace Roslynator.CSharp
                 return null;
             }
 
-            bool IsFirstChild(SyntaxNode node)
+            static bool IsFirstChild(SyntaxNode node)
             {
                 SyntaxNode parent = node.Parent;
 
@@ -547,18 +543,22 @@ namespace Roslynator.CSharp
                     case SyntaxKind.ElementAccessExpression:
                     case SyntaxKind.InvocationExpression:
                         {
-                            prev = parent;
-                            continue;
+                            break;
                         }
                     case SyntaxKind.ConditionalAccessExpression:
                         {
-                            return ((ConditionalAccessExpressionSyntax)parent).WhenNotNull == prev;
+                            if (((ConditionalAccessExpressionSyntax)parent).WhenNotNull == prev)
+                                return true;
+
+                            break;
                         }
                     default:
                         {
                             return false;
                         }
                 }
+
+                prev = parent;
             }
 
             return false;
@@ -633,19 +633,15 @@ namespace Roslynator.CSharp
         {
             foreach (SyntaxNode node in expression.DescendantNodes())
             {
-                if (node.Kind() == SyntaxKind.Argument)
+                if (node is ArgumentSyntax argument
+                    && argument.RefOrOutKeyword.Kind() == SyntaxKind.OutKeyword)
                 {
-                    var argument = (ArgumentSyntax)node;
+                    ExpressionSyntax argumentExpression = argument.Expression;
 
-                    if (argument.RefOrOutKeyword.Kind() == SyntaxKind.OutKeyword)
+                    if (argumentExpression?.IsMissing == false
+                        && semanticModel.GetSymbol(argumentExpression, cancellationToken)?.Kind == SymbolKind.Local)
                     {
-                        ExpressionSyntax argumentExpression = argument.Expression;
-
-                        if (argumentExpression?.IsMissing == false
-                            && semanticModel.GetSymbol(argumentExpression, cancellationToken)?.Kind == SymbolKind.Local)
-                        {
-                            return true;
-                        }
+                        return true;
                     }
                 }
             }

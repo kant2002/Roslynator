@@ -29,7 +29,7 @@ namespace Roslynator.CSharp.Analysis
             context.RegisterSyntaxNodeAction(AnalyzeAccessorList, SyntaxKind.AccessorList);
         }
 
-        public static void AnalyzeAccessorList(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeAccessorList(SyntaxNodeAnalysisContext context)
         {
             var accessorList = (AccessorListSyntax)context.Node;
 
@@ -132,7 +132,7 @@ namespace Roslynator.CSharp.Analysis
 
                 if (statements.Count <= 1
                     && accessor.SyntaxTree.IsMultiLineSpan(TextSpan.FromBounds(accessor.Keyword.SpanStart, accessor.Span.End))
-                    && (statements.Count == 0 || statements[0].IsSingleLine()))
+                    && (!statements.Any() || statements[0].IsSingleLine()))
                 {
                     return accessor
                        .DescendantTrivia(accessor.Span, descendIntoTrivia: true)

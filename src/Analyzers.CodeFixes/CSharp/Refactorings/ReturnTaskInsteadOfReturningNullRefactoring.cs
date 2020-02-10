@@ -154,11 +154,9 @@ namespace Roslynator.CSharp.Refactorings
         {
             var typeSymbol = (INamedTypeSymbol)semanticModel.GetTypeInfo(expression, cancellationToken).ConvertedType;
 
-            int position = expression.SpanStart;
-
             ITypeSymbol typeArgument = typeSymbol.TypeArguments[0];
 
-            TypeSyntax type = typeArgument.ToMinimalTypeSyntax(semanticModel, position);
+            TypeSyntax type = typeArgument.ToTypeSyntax().WithSimplifierAnnotation();
 
             ExpressionSyntax defaultValue = typeArgument.GetDefaultValueSyntax(document.GetDefaultSyntaxOptions(), type);
 

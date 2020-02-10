@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Immutable;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,7 +25,8 @@ namespace Roslynator.CommandLine
             NamespaceDocumentationParts ignoredNamespaceParts,
             TypeDocumentationParts ignoredTypeParts,
             MemberDocumentationParts ignoredMemberParts,
-            OmitContainingNamespaceParts omitContainingNamespaceParts,
+            OmitMemberParts omitMemberParts,
+            IncludeContainingNamespaceFilter includeContainingNamespaceFilter,
             Visibility visibility,
             in ProjectFilter projectFilter) : base(projectFilter)
         {
@@ -34,7 +36,8 @@ namespace Roslynator.CommandLine
             IgnoredNamespaceParts = ignoredNamespaceParts;
             IgnoredTypeParts = ignoredTypeParts;
             IgnoredMemberParts = ignoredMemberParts;
-            OmitContainingNamespaceParts = omitContainingNamespaceParts;
+            OmitMemberParts = omitMemberParts;
+            IncludeContainingNamespaceFilter = includeContainingNamespaceFilter;
             Visibility = visibility;
         }
 
@@ -50,7 +53,9 @@ namespace Roslynator.CommandLine
 
         public MemberDocumentationParts IgnoredMemberParts { get; }
 
-        public OmitContainingNamespaceParts OmitContainingNamespaceParts { get; }
+        public OmitMemberParts OmitMemberParts { get; }
+
+        public IncludeContainingNamespaceFilter IncludeContainingNamespaceFilter { get; }
 
         public Visibility Visibility { get; }
 
@@ -62,15 +67,14 @@ namespace Roslynator.CommandLine
                 ignoredNames: Options.IgnoredNames,
                 preferredCultureName: Options.PreferredCulture,
                 maxDerivedTypes: Options.MaxDerivedTypes,
-                includeClassHierarchy: !Options.NoClassHierarchy,
                 placeSystemNamespaceFirst: !Options.NoPrecedenceForSystem,
-                formatDeclarationBaseList: !Options.NoFormatBaseList,
-                formatDeclarationConstraints: !Options.NoFormatConstraints,
+                wrapDeclarationBaseTypes: !Options.NoWrapBaseTypes,
+                wrapDeclarationConstraints: !Options.NoWrapConstraints,
                 markObsolete: !Options.NoMarkObsolete,
-                includeMemberInheritedFrom: !Options.OmitMemberInheritedFrom,
-                includeMemberOverrides: !Options.OmitMemberOverrides,
-                includeMemberImplements: !Options.OmitMemberImplements,
-                includeMemberConstantValue: !Options.OmitMemberConstantValue,
+                includeMemberInheritedFrom: (OmitMemberParts & OmitMemberParts.InheritedFrom) == 0,
+                includeMemberOverrides: (OmitMemberParts & OmitMemberParts.Overrides) == 0,
+                includeMemberImplements: (OmitMemberParts & OmitMemberParts.Implements) == 0,
+                includeMemberConstantValue: (OmitMemberParts & OmitMemberParts.ConstantValue) == 0,
                 includeInheritedInterfaceMembers: Options.IncludeInheritedInterfaceMembers,
                 includeAllDerivedTypes: Options.IncludeAllDerivedTypes,
                 includeAttributeArguments: !Options.OmitAttributeArguments,
@@ -82,15 +86,21 @@ namespace Roslynator.CommandLine
                 ignoredNamespaceParts: IgnoredNamespaceParts,
                 ignoredTypeParts: IgnoredTypeParts,
                 ignoredMemberParts: IgnoredMemberParts,
-                omitContainingNamespaceParts: OmitContainingNamespaceParts,
+                includeContainingNamespaceFilter: IncludeContainingNamespaceFilter,
                 scrollToContent: Options.ScrollToContent);
 
             ImmutableArray<Compilation> compilations = await GetCompilationsAsync(projectOrSolution, cancellationToken);
 
             var documentationModel = new DocumentationModel(compilations, DocumentationFilterOptions.Instance, Options.AdditionalXmlDocumentation);
+#if DEBUG
+            SourceReferenceProvider sourceReferenceProvider = (Options.SourceReferences.Any())
+                ? SourceReferenceProvider.Load(Options.SourceReferences)
+                : null;
 
+            var generator = new MarkdownDocumentationGenerator(documentationModel, WellKnownUrlProviders.GitHub, documentationOptions, sourceReferenceProvider);
+#else
             var generator = new MarkdownDocumentationGenerator(documentationModel, WellKnownUrlProviders.GitHub, documentationOptions);
-
+#endif
             string directoryPath = Options.Output;
 
             if (!Options.NoDelete
@@ -102,7 +112,7 @@ namespace Roslynator.CommandLine
                 }
                 catch (IOException ex)
                 {
-                    WriteLine(ex.ToString(), Verbosity.Quiet);
+                    WriteError(ex);
                     return CommandResult.Fail;
                 }
             }

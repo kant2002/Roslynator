@@ -39,6 +39,7 @@ namespace Roslynator.CommandLine
                     FindSymbolsCommandLineOptions,
                     SlnListCommandLineOptions,
                     ListVisualStudioCommandLineOptions,
+                    GenerateSourceReferencesCommandLineOptions,
 #endif
                     FixCommandLineOptions,
                     AnalyzeCommandLineOptions,
@@ -86,6 +87,7 @@ namespace Roslynator.CommandLine
                     (FindSymbolsCommandLineOptions options) => FindSymbolsAsync(options).Result,
                     (SlnListCommandLineOptions options) => SlnListAsync(options).Result,
                     (ListVisualStudioCommandLineOptions options) => ListVisualStudio(options),
+                    (GenerateSourceReferencesCommandLineOptions options) => GenerateSourceReferencesAsync(options).Result,
 #endif
                     (FixCommandLineOptions options) => FixAsync(options).Result,
                     (AnalyzeCommandLineOptions options) => AnalyzeAsync(options).Result,
@@ -99,7 +101,22 @@ namespace Roslynator.CommandLine
             }
             catch (Exception ex)
             {
-                WriteLine(ex.ToString());
+                if (ex is AggregateException aggregateException)
+                {
+                    foreach (Exception innerException in aggregateException.InnerExceptions)
+                    {
+                        WriteError(innerException);
+                    }
+                }
+                else if (ex is FileNotFoundException
+                    || ex is InvalidOperationException)
+                {
+                    WriteError(ex);
+                }
+                else
+                {
+                    throw;
+                }
             }
             finally
             {
@@ -234,7 +251,7 @@ namespace Roslynator.CommandLine
             if (!TryParseOptionValueAsEnum(options.Depth, ParameterNames.Depth, out DocumentationDepth depth, DocumentationDepth.Member))
                 return 1;
 
-            if (!TryParseOptionValueAsEnumFlags(options.Format, ParameterNames.Format, out SymbolDefinitionFormatOptions formatOptions))
+            if (!TryParseOptionValueAsEnumFlags(options.WrapList, ParameterNames.WrapList, out WrapListOptions wrapListOptions))
                 return 1;
 
             if (!TryParseMetadataNames(options.IgnoredAttributes, out ImmutableArray<MetadataName> ignoredAttributes))
@@ -256,7 +273,9 @@ namespace Roslynator.CommandLine
                 ? ImmutableArray.Create<SymbolFilterRule>(new IgnoredNameSymbolFilterRule(ignoredSymbols))
                 : ImmutableArray<SymbolFilterRule>.Empty;
 
-            ImmutableArray<AttributeFilterRule> attributeRules = ImmutableArray.Create<AttributeFilterRule>(new IgnoredAttributeNameFilterRule(ignoredAttributes.AddRange(DocumentationFilterOptions.IgnoredAttributes)));
+            ImmutableArray<AttributeFilterRule> attributeRules = ImmutableArray.Create<AttributeFilterRule>(
+                IgnoredAttributeNameFilterRule.Default,
+                new IgnoredAttributeNameFilterRule(ignoredAttributes));
 
             var symbolFilterOptions = new SymbolFilterOptions(
                 visibility: visibilityFilter,
@@ -267,7 +286,7 @@ namespace Roslynator.CommandLine
             var command = new ListSymbolsCommand(
                 options: options,
                 symbolFilterOptions: symbolFilterOptions,
-                formatOptions: formatOptions,
+                wrapListOptions: wrapListOptions,
                 layout: layout,
                 ignoredParts: ignoredParts,
                 projectFilter: projectFilter);
@@ -310,13 +329,6 @@ namespace Roslynator.CommandLine
             var command = new FormatCommand(options, projectFilter);
 
             IEnumerable<string> properties = options.Properties;
-
-            if (options.GetSupportedDiagnostics().Any())
-            {
-                string ruleSetPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "format.ruleset");
-
-                properties = properties.Concat(new string[] { $"CodeAnalysisRuleSet={ruleSetPath}" });
-            }
 
             CommandResult result = await command.ExecuteAsync(options.Path, options.MSBuildPath, properties);
 
@@ -391,7 +403,10 @@ namespace Roslynator.CommandLine
             if (!TryParseOptionValueAsEnumFlags(options.IgnoredMemberParts, ParameterNames.IgnoredMemberParts, out MemberDocumentationParts ignoredMemberParts, DocumentationOptions.Default.IgnoredMemberParts))
                 return 1;
 
-            if (!TryParseOptionValueAsEnumFlags(options.OmitContainingNamespaceParts, ParameterNames.OmitContainingNamespaceParts, out OmitContainingNamespaceParts omitContainingNamespaceParts, DocumentationOptions.Default.OmitContainingNamespaceParts))
+            if (!TryParseOptionValueAsEnumFlags(options.IncludeContainingNamespace, ParameterNames.IncludeContainingNamespace, out IncludeContainingNamespaceFilter includeContainingNamespaceFilter, DocumentationOptions.Default.IncludeContainingNamespaceFilter))
+                return 1;
+
+            if (!TryParseOptionValueAsEnumFlags(options.OmitMemberParts, ParameterNames.OmitMemberParts, out OmitMemberParts omitMemberParts, OmitMemberParts.None))
                 return 1;
 
             if (!TryParseOptionValueAsEnum(options.Visibility, ParameterNames.Visibility, out Visibility visibility))
@@ -407,7 +422,8 @@ namespace Roslynator.CommandLine
                 ignoredNamespaceParts,
                 ignoredTypeParts,
                 ignoredMemberParts,
-                omitContainingNamespaceParts,
+                omitMemberParts,
+                includeContainingNamespaceFilter,
                 visibility,
                 projectFilter);
 
@@ -418,6 +434,9 @@ namespace Roslynator.CommandLine
 
         private static async Task<int> GenerateDocRootAsync(GenerateDocRootCommandLineOptions options)
         {
+            if (!TryParseOptionValueAsEnumFlags(options.IncludeContainingNamespace, ParameterNames.IncludeContainingNamespace, out IncludeContainingNamespaceFilter includeContainingNamespaceFilter, DocumentationOptions.Default.IncludeContainingNamespaceFilter))
+                return 1;
+
             if (!TryParseOptionValueAsEnum(options.Visibility, ParameterNames.Visibility, out Visibility visibility))
                 return 1;
 
@@ -434,6 +453,29 @@ namespace Roslynator.CommandLine
                 options,
                 depth,
                 ignoredParts,
+                includeContainingNamespaceFilter: includeContainingNamespaceFilter,
+                visibility,
+                projectFilter);
+
+            CommandResult result = await command.ExecuteAsync(options.Path, options.MSBuildPath, options.Properties);
+
+            return (result.Kind == CommandResultKind.Success) ? 0 : 1;
+        }
+
+        private static async Task<int> GenerateSourceReferencesAsync(GenerateSourceReferencesCommandLineOptions options)
+        {
+            if (!TryParseOptionValueAsEnum(options.Depth, ParameterNames.Depth, out DocumentationDepth depth, DocumentationOptions.Default.Depth))
+                return 1;
+
+            if (!TryParseOptionValueAsEnum(options.Visibility, ParameterNames.Visibility, out Visibility visibility))
+                return 1;
+
+            if (!options.TryGetProjectFilter(out ProjectFilter projectFilter))
+                return 1;
+
+            var command = new GenerateSourceReferencesCommand(
+                options,
+                depth,
                 visibility,
                 projectFilter);
 

@@ -22,7 +22,8 @@ namespace Roslynator.CSharp.Analysis
                     DiagnosticDescriptors.DeclareEnumMemberWithZeroValue,
                     DiagnosticDescriptors.CompositeEnumValueContainsUndefinedFlag,
                     DiagnosticDescriptors.DeclareEnumValueAsCombinationOfNames,
-                    DiagnosticDescriptors.DuplicateEnumValue);
+                    DiagnosticDescriptors.DuplicateEnumValue,
+                    DiagnosticDescriptors.UseBitShiftOperator);
             }
         }
 
@@ -36,7 +37,7 @@ namespace Roslynator.CSharp.Analysis
             context.RegisterSymbolAction(AnalyzeNamedType, SymbolKind.NamedType);
         }
 
-        public static void AnalyzeNamedType(SymbolAnalysisContext context)
+        private static void AnalyzeNamedType(SymbolAnalysisContext context)
         {
             var typeSymbol = (INamedTypeSymbol)context.Symbol;
 
@@ -46,11 +47,11 @@ namespace Roslynator.CSharp.Analysis
             if (typeSymbol.TypeKind != TypeKind.Enum)
                 return;
 
-            bool isFlags = typeSymbol.HasAttribute(MetadataNames.System_FlagsAttribute);
+            bool hasFlagsAttribute = typeSymbol.HasAttribute(MetadataNames.System_FlagsAttribute);
 
             ImmutableArray<ISymbol> members = default;
 
-            if (isFlags
+            if (hasFlagsAttribute
                 && !context.IsAnalyzerSuppressed(DiagnosticDescriptors.DeclareEnumMemberWithZeroValue))
             {
                 members = typeSymbol.GetMembers();
@@ -65,29 +66,28 @@ namespace Roslynator.CSharp.Analysis
 
             EnumSymbolInfo enumInfo = default;
 
-            if (isFlags
+            if (hasFlagsAttribute
                 && !context.IsAnalyzerSuppressed(DiagnosticDescriptors.CompositeEnumValueContainsUndefinedFlag))
             {
                 enumInfo = EnumSymbolInfo.Create(typeSymbol);
 
-                ImmutableArray<EnumFieldSymbolInfo> fields = enumInfo.Fields;
-
-                for (int i = 0; i < fields.Length; i++)
+                foreach (EnumFieldSymbolInfo field in enumInfo.Fields)
                 {
-                    if (fields[i].HasValue
-                        && ConvertHelpers.CanConvert(fields[i].Value, typeSymbol.EnumUnderlyingType.SpecialType)
-                        && fields[i].HasCompositeValue())
+                    if (field.HasValue
+                        && ConvertHelpers.CanConvert(field.Value, typeSymbol.EnumUnderlyingType.SpecialType)
+                        && !IsMaxValue(field.Value, typeSymbol.EnumUnderlyingType.SpecialType)
+                        && field.HasCompositeValue())
                     {
-                        foreach (ulong value in (fields[i].DecomposeValue()))
+                        foreach (ulong value in (field.DecomposeValue()))
                         {
                             if (!enumInfo.Contains(value))
-                                ReportUndefinedFlag(context, fields[i].Symbol, value.ToString());
+                                ReportUndefinedFlag(context, field.Symbol, value.ToString());
                         }
                     }
                 }
             }
 
-            if (isFlags
+            if (hasFlagsAttribute
                 && !context.IsAnalyzerSuppressed(DiagnosticDescriptors.DeclareEnumValueAsCombinationOfNames))
             {
                 if (members.IsDefault)
@@ -99,7 +99,7 @@ namespace Roslynator.CSharp.Analysis
                         continue;
 
                     if (!fieldSymbol.HasConstantValue)
-                        return;
+                        break;
 
                     EnumFieldSymbolInfo fieldInfo = EnumFieldSymbolInfo.Create(fieldSymbol);
 
@@ -108,7 +108,7 @@ namespace Roslynator.CSharp.Analysis
 
                     var declaration = (EnumMemberDeclarationSyntax)fieldInfo.Symbol.GetSyntax(context.CancellationToken);
 
-                    ExpressionSyntax expression = declaration.EqualsValue?.Value;
+                    ExpressionSyntax expression = declaration.EqualsValue?.Value.WalkDownParentheses();
 
                     if (expression != null
                         && (expression.IsKind(SyntaxKind.NumericLiteralExpression)
@@ -121,13 +121,49 @@ namespace Roslynator.CSharp.Analysis
                             enumInfo = EnumSymbolInfo.Create(typeSymbol);
 
                             if (enumInfo.Fields.Any(f => !f.HasValue))
-                                return;
+                                break;
                         }
 
                         List<EnumFieldSymbolInfo> values = enumInfo.Decompose(fieldInfo);
 
                         if (values?.Count > 1)
                             DiagnosticHelpers.ReportDiagnostic(context, DiagnosticDescriptors.DeclareEnumValueAsCombinationOfNames, expression);
+                    }
+                }
+            }
+
+            if (hasFlagsAttribute
+                && !context.IsAnalyzerSuppressed(DiagnosticDescriptors.UseBitShiftOperator))
+            {
+                if (members.IsDefault)
+                    members = typeSymbol.GetMembers();
+
+                foreach (ISymbol member in members)
+                {
+                    if (!(member is IFieldSymbol fieldSymbol))
+                        continue;
+
+                    if (!fieldSymbol.HasConstantValue)
+                        continue;
+
+                    EnumFieldSymbolInfo fieldInfo = EnumFieldSymbolInfo.Create(fieldSymbol);
+
+                    if (fieldInfo.Value <= 1)
+                        continue;
+
+                    if (fieldInfo.HasCompositeValue())
+                        continue;
+
+                    var declaration = (EnumMemberDeclarationSyntax)fieldInfo.Symbol.GetSyntax(context.CancellationToken);
+
+                    ExpressionSyntax expression = declaration.EqualsValue?.Value.WalkDownParentheses();
+
+                    if (expression.IsKind(SyntaxKind.NumericLiteralExpression))
+                    {
+                        var enumDeclaration = (EnumDeclarationSyntax)typeSymbol.GetSyntax(context.CancellationToken);
+
+                        DiagnosticHelpers.ReportDiagnostic(context, DiagnosticDescriptors.UseBitShiftOperator, enumDeclaration.Identifier);
+                        break;
                     }
                 }
             }
@@ -172,12 +208,12 @@ namespace Roslynator.CSharp.Analysis
                         {
                             if (value2 != null)
                             {
-                                ReportDuplicateValue(context, enumMember1);
+                                ReportDuplicateValue(context, enumMember1, value2);
                             }
                         }
                         else if (value2 == null)
                         {
-                            ReportDuplicateValue(context, enumMember2);
+                            ReportDuplicateValue(context, enumMember2, value1);
                         }
                         else
                         {
@@ -237,6 +273,37 @@ namespace Roslynator.CSharp.Analysis
             return false;
         }
 
+        private static bool IsMaxValue(ulong value, SpecialType numericType)
+        {
+            switch (numericType)
+            {
+                case SpecialType.System_SByte:
+                    return value == (ulong)sbyte.MaxValue;
+                case SpecialType.System_Byte:
+                    return value == byte.MaxValue;
+                case SpecialType.System_Int16:
+                    return value == (ulong)short.MaxValue;
+                case SpecialType.System_UInt16:
+                    return value == ushort.MaxValue;
+                case SpecialType.System_Int32:
+                    return value == int.MaxValue;
+                case SpecialType.System_UInt32:
+                    return value == uint.MaxValue;
+                case SpecialType.System_Int64:
+                    return value == long.MaxValue;
+                case SpecialType.System_UInt64:
+                    return true;
+                case SpecialType.System_Decimal:
+                    return value == decimal.MaxValue;
+                case SpecialType.System_Single:
+                    return value == float.MaxValue;
+                case SpecialType.System_Double:
+                    return value == double.MaxValue;
+                default:
+                    throw new ArgumentException("", nameof(numericType));
+            }
+        }
+
         private static void ReportUndefinedFlag(SymbolAnalysisContext context, ISymbol fieldSymbol, string value)
         {
             var enumMember = (EnumMemberDeclarationSyntax)fieldSymbol.GetSyntax(context.CancellationToken);
@@ -249,7 +316,23 @@ namespace Roslynator.CSharp.Analysis
                 value);
         }
 
-        private static void ReportDuplicateValue(SymbolAnalysisContext context, SyntaxNode node)
+        private static void ReportDuplicateValue(
+            SymbolAnalysisContext context,
+            EnumMemberDeclarationSyntax enumMember,
+            ExpressionSyntax value)
+        {
+            if (value is IdentifierNameSyntax identifierName
+                && string.Equals(enumMember.Identifier.ValueText, identifierName.Identifier.ValueText, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            DiagnosticHelpers.ReportDiagnostic(context, DiagnosticDescriptors.DuplicateEnumValue, enumMember);
+        }
+
+        private static void ReportDuplicateValue(
+            SymbolAnalysisContext context,
+            SyntaxNode node)
         {
             DiagnosticHelpers.ReportDiagnostic(context, DiagnosticDescriptors.DuplicateEnumValue, node);
         }

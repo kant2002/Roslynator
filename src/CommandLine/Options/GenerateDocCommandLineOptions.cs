@@ -22,11 +22,11 @@ namespace Roslynator.CommandLine
 
         [Option(longName: ParameterNames.IgnoredNamespaceParts,
             HelpText = "Defines parts of a namespace documentation that should be excluded. Allowed values are content, containing-namespace, summary, examples, remarks, classes, structs, interfaces, enums, delegates and see-also.",
-            MetaValue = "<IGNORED_MEMBER_PARTS>")]
+            MetaValue = "<IGNORED_NAMESPACE_PARTS>")]
         public IEnumerable<string> IgnoredNamespaceParts { get; set; }
 
         [Option(longName: ParameterNames.IgnoredRootParts,
-            HelpText = "Defines parts of a root documentation that should be excluded. Allowed values are content, namespaces, classes, static-classes, structs, interfaces, enums, delegates and other.",
+            HelpText = "Defines parts of a root documentation that should be excluded. Allowed values are content, namespaces, class-hierarchy, types and other.",
             MetaValue = "<IGNORED_ROOT_PARTS>")]
         public IEnumerable<string> IgnoredRootParts { get; set; }
 
@@ -39,6 +39,11 @@ namespace Roslynator.CommandLine
             HelpText = "Indicates whether all derived types should be included in the list of derived types. By default only types that directly inherits from a specified type are displayed.")]
         public bool IncludeAllDerivedTypes { get; set; }
 
+        [Option(longName: ParameterNames.IncludeContainingNamespace,
+            HelpText = "Defines parts of a documentation that should include containing namespace. Allowed values are class-hierarchy, containing-type, parameter, return-type, base-type, attribute, derived-type, implemented-interface, implemented-member, exception, see-also and all.",
+            MetaValue = "<INCLUDE_CONTAINING_NAMESPACE>")]
+        public IEnumerable<string> IncludeContainingNamespace { get; set; }
+
         [Option(longName: "include-ienumerable",
             HelpText = "Indicates whether interface System.Collections.IEnumerable should be included in a documentation if a type also implements interface System.Collections.Generic.IEnumerable<T>.")]
         public bool IncludeIEnumerable { get; set; }
@@ -46,6 +51,10 @@ namespace Roslynator.CommandLine
         [Option(longName: "include-inherited-interface-members",
             HelpText = "Indicates whether inherited interface members should be displayed in a list of members.")]
         public bool IncludeInheritedInterfaceMembers { get; set; }
+
+        [Option(longName: ParameterNames.IncludeSystemNamespace,
+            HelpText = "Indicates whether namespace should be included when a type is directly contained in namespace 'System'.")]
+        public bool IncludeSystemNamespace { get; set; }
 
         [Option(longName: "inheritance-style",
             Default = DefaultValues.InheritanceStyle,
@@ -63,46 +72,33 @@ namespace Roslynator.CommandLine
             HelpText = "Indicates whether output directory should not be deleted at the beginning of the process.")]
         public bool NoDelete { get; set; }
 
-        [Option(longName: "no-format-base-list",
-            HelpText = "Indicates whether a base list should not be formatted on a multiple lines.")]
-        public bool NoFormatBaseList { get; set; }
+        [Option(longName: "no-wrap-base-types",
+            HelpText = "Indicates whether base types should not be wrapped.")]
+        public bool NoWrapBaseTypes { get; set; }
 
-        [Option(longName: "no-format-constraints",
-            HelpText = "Indicates whether constraints should not be formatted on a multiple lines.")]
-        public bool NoFormatConstraints { get; set; }
+        [Option(longName: "no-wrap-constraints",
+            HelpText = "Indicates whether constraints should not be wrapped.")]
+        public bool NoWrapConstraints { get; set; }
 
         [Option(longName: "omit-attribute-arguments",
             HelpText = "Indicates whether attribute arguments should be omitted when displaying an attribute.")]
         public bool OmitAttributeArguments { get; set; }
 
-        [Option(longName: ParameterNames.OmitContainingNamespaceParts,
-            HelpText = "Defines parts that that should by displayed without containing namespace. Allowed values are root, containing-type, return-type, base-type, attribute, derived-type, implemented-interface, implemented-member, exception, see-also and all.",
-            MetaValue = "<OMIT_CONTAINING_NAMESPACE_PARTS>")]
-        public IEnumerable<string> OmitContainingNamespaceParts { get; set; }
-
         [Option(longName: "omit-inherited-atttributes",
             HelpText = "Indicates whether inherited attributes should be omitted.")]
         public bool OmitInheritedAttributes { get; set; }
 
-        [Option(longName: "omit-member-constant-value",
-            HelpText = "Indicates whether a constant value of a member should be omitted.")]
-        public bool OmitMemberConstantValue { get; set; }
-
-        [Option(longName: "omit-member-implements",
-            HelpText = "Indicates whether an interface member that is being implemented should be omitted.")]
-        public bool OmitMemberImplements { get; set; }
-
-        [Option(longName: "omit-member-inherited-from",
-            HelpText = "Indicates whether a containing member of an inherited member should be omitted.")]
-        public bool OmitMemberInheritedFrom { get; set; }
-
-        [Option(longName: "omit-member-overrides",
-            HelpText = "Indicates whether an overridden member should be omitted.")]
-        public bool OmitMemberOverrides { get; set; }
+        [Option(longName: ParameterNames.OmitMemberParts,
+            HelpText = "Defines parts of member definition that should be omitted. Allowed values are constant-value, implements, inherited-from and overrides.")]
+        public IEnumerable<string> OmitMemberParts { get; set; }
 
         [Option(longName: "preferred-culture",
             HelpText = "Defines culture that should be used when searching for xml documentation files.",
             MetaValue = "<CULTURE_ID>")]
         public string PreferredCulture { get; set; }
+#if DEBUG
+        [Option(longName: "source-references")]
+        public IEnumerable<string> SourceReferences { get; set; }
+#endif
     }
 }

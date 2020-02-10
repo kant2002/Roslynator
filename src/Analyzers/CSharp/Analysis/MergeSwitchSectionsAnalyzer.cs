@@ -28,7 +28,7 @@ namespace Roslynator.CSharp.Analysis
             context.RegisterSyntaxNodeAction(AnalyzeSwitchStatement, SyntaxKind.SwitchStatement);
         }
 
-        public static void AnalyzeSwitchStatement(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeSwitchStatement(SyntaxNodeAnalysisContext context)
         {
             var switchStatement = (SwitchStatementSyntax)context.Node;
 
@@ -54,9 +54,7 @@ namespace Roslynator.CSharp.Analysis
         {
             SyntaxList<StatementSyntax> statements = GetStatementsOrDefault(sections[0]);
 
-            int i = 1;
-
-            while (i < sections.Count)
+            for (int i = 1; i < sections.Count; i++)
             {
                 SyntaxList<StatementSyntax> nextStatements = GetStatementsOrDefault(sections[i]);
 
@@ -68,7 +66,6 @@ namespace Roslynator.CSharp.Analysis
                 }
 
                 statements = nextStatements;
-                i++;
             }
 
             return null;
@@ -105,7 +102,7 @@ namespace Roslynator.CSharp.Analysis
         {
             switch (statement1)
             {
-                case BreakStatementSyntax breakStatement:
+                case BreakStatementSyntax _:
                     {
                         return statement2.Kind() == SyntaxKind.BreakStatement;
                     }

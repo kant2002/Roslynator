@@ -31,7 +31,7 @@ namespace Roslynator.CSharp.Analysis
             context.RegisterSyntaxNodeAction(AnalyzeSwitchStatement, SyntaxKind.SwitchStatement);
         }
 
-        public static void AnalyzeIfStatement(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeIfStatement(SyntaxNodeAnalysisContext context)
         {
             var ifStatement = (IfStatementSyntax)context.Node;
 
@@ -74,14 +74,17 @@ namespace Roslynator.CSharp.Analysis
                 if (statement.IsKind(SyntaxKind.Block))
                     statement = ((BlockSyntax)statement).Statements.LastOrDefault();
 
-                if (!IsSymbolAssignedInStatement(symbol, statement, semanticModel, cancellationToken))
+                if (!statement.IsKind(SyntaxKind.ThrowStatement)
+                    && !IsSymbolAssignedInStatement(symbol, statement, semanticModel, cancellationToken))
+                {
                     return;
+                }
             }
 
             DiagnosticHelpers.ReportDiagnostic(context, DiagnosticDescriptors.UseReturnInsteadOfAssignment, ifStatement);
         }
 
-        public static void AnalyzeSwitchStatement(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeSwitchStatement(SyntaxNodeAnalysisContext context)
         {
             var switchStatement = (SwitchStatementSyntax)context.Node;
 
@@ -118,14 +121,30 @@ namespace Roslynator.CSharp.Analysis
             {
                 SyntaxList<StatementSyntax> statements = section.GetStatements();
 
-                if (statements.Count <= 1)
+                if (!statements.Any())
                     return;
 
-                if (!statements.Last().IsKind(SyntaxKind.BreakStatement))
-                    return;
+                switch (statements.Last().Kind())
+                {
+                    case SyntaxKind.ThrowStatement:
+                        {
+                            continue;
+                        }
+                    case SyntaxKind.BreakStatement:
+                        {
+                            if (statements.Count == 1
+                                || !IsSymbolAssignedInStatement(symbol, statements.LastButOne(), semanticModel, cancellationToken))
+                            {
+                                return;
+                            }
 
-                if (!IsSymbolAssignedInStatement(symbol, statements[statements.Count - 2], semanticModel, cancellationToken))
-                    return;
+                            break;
+                        }
+                    default:
+                        {
+                            return;
+                        }
+                }
             }
 
             DiagnosticHelpers.ReportDiagnostic(context, DiagnosticDescriptors.UseReturnInsteadOfAssignment, switchStatement);

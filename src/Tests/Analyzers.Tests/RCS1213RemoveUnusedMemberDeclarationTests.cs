@@ -278,5 +278,59 @@ class C
 }
 ");
         }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.RemoveUnusedMemberDeclaration)]
+        public async Task TestNoDiagnostic_StructLayoutAttribute()
+        {
+            await VerifyNoDiagnosticAsync(@"
+using System.Runtime.InteropServices;
+
+[StructLayout(LayoutKind.Sequential)]
+struct S
+{
+    private int F;
+}
+");
+        }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.RemoveUnusedMemberDeclaration)]
+        public async Task TestNoDiagnostic_DelegateAsTypeArgument()
+        {
+            await VerifyNoDiagnosticAsync(@"
+using System.Collections.Generic;
+
+class C
+{
+    private delegate string D(int value);
+
+    public void M()
+    {
+        var x = new Dictionary<string, D>();
+    }
+}
+");
+        }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.RemoveUnusedMemberDeclaration)]
+        public async Task TestNoDiagnostic_OverloadResolutionFailure()
+        {
+            await VerifyNoDiagnosticAsync(@"
+using System;
+
+class C
+{
+    readonly CustomTimer customtimer = new CustomTimer();
+
+    C()
+    {
+        customtimer.Tick += CustomTimer_Tick;
+    }
+
+    void CustomTimer_Tick(object _, EventArgs __)
+    {
+    }
+}
+", options: Options.AddAllowedCompilerDiagnosticId("CS0246"));
+        }
     }
 }

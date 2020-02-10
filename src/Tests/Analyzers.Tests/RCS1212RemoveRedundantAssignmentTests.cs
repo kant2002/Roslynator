@@ -18,7 +18,59 @@ namespace Roslynator.CSharp.Analysis.Tests
         public override CodeFixProvider FixProvider { get; } = new AssignmentExpressionCodeFixProvider();
 
         [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.RemoveRedundantAssignment)]
-        public async Task Test()
+        public async Task Test_Local()
+        {
+            await VerifyDiagnosticAndFixAsync(@"
+class C
+{
+    bool M()
+    {
+        bool f = false;
+        bool g = false;
+
+        [|f = false|];
+        return f;
+    }
+}
+", @"
+class C
+{
+    bool M()
+    {
+        bool f = false;
+        bool g = false;
+
+        return false;
+    }
+}
+");
+        }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.RemoveRedundantAssignment)]
+        public async Task Test_Parameter()
+        {
+            await VerifyDiagnosticAndFixAsync(@"
+class C
+{
+    bool M(bool f)
+    {
+        [|f = false|];
+        return f;
+    }
+}
+", @"
+class C
+{
+    bool M(bool f)
+    {
+        return false;
+    }
+}
+");
+        }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.RemoveRedundantAssignment)]
+        public async Task Test_Local_WithComment()
         {
             await VerifyDiagnosticAndFixAsync(@"
 class C
@@ -39,6 +91,96 @@ class C
         //x
         return """";
     }
+}
+");
+        }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.RemoveRedundantAssignment)]
+        public async Task Test_Local_ReferencedInRightSideOfAssignment()
+        {
+            await VerifyDiagnosticAndFixAsync(@"
+class C
+{
+    string M()
+    {
+        string s = """";
+        [|s = s + s|];
+        return s;
+    }
+}
+", @"
+class C
+{
+    string M()
+    {
+        string s = """";
+        return s + s;
+    }
+}
+");
+        }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.RemoveRedundantAssignment)]
+        public async Task TestNoDiagnostic_OutParameter()
+        {
+            await VerifyNoDiagnosticAsync(@"
+class C
+{
+    bool M(out bool f)
+    {
+        f = false;
+        return f;
+    }
+}
+");
+        }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.RemoveRedundantAssignment)]
+        public async Task TestNoDiagnostic_SequenceOfAssignments()
+        {
+            await VerifyNoDiagnosticAsync(@"
+class C
+{
+    int M()
+    {
+        int x = 1;
+        x = x * 2;
+        x = x * 2;
+        return x;
+    }
+}
+");
+        }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.RemoveRedundantAssignment)]
+        public async Task TestNoDiagnostic_LocalReferencedInLambda()
+        {
+            await VerifyNoDiagnosticAsync(@"
+using System;
+
+class C
+{
+    C M()
+    {
+        C c = null;
+        c = new C(f =>
+        {
+            c.M(f);
+        });
+
+        return c;
+    }
+
+    public C(Action<int> action)
+    {
+        _a = action;
+    }
+
+    void M(int p)
+    {
+    }
+
+    Action<int> _a;
 }
 ");
         }

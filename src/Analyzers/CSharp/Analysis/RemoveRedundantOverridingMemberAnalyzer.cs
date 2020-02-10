@@ -35,7 +35,7 @@ namespace Roslynator.CSharp.Analysis
             context.RegisterSyntaxNodeAction(AnalyzeIndexerDeclaration, SyntaxKind.IndexerDeclaration);
         }
 
-        public static void AnalyzeMethodDeclaration(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeMethodDeclaration(SyntaxNodeAnalysisContext context)
         {
             var methodDeclaration = (MethodDeclarationSyntax)context.Node;
 
@@ -237,7 +237,7 @@ namespace Roslynator.CSharp.Analysis
             return null;
         }
 
-        public static void AnalyzePropertyDeclaration(SyntaxNodeAnalysisContext context)
+        private static void AnalyzePropertyDeclaration(SyntaxNodeAnalysisContext context)
         {
             var propertyDeclaration = (PropertyDeclarationSyntax)context.Node;
 
@@ -368,7 +368,7 @@ namespace Roslynator.CSharp.Analysis
             }
         }
 
-        public static void AnalyzeIndexerDeclaration(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeIndexerDeclaration(SyntaxNodeAnalysisContext context)
         {
             var indexerDeclaration = (IndexerDeclarationSyntax)context.Node;
 
@@ -419,10 +419,8 @@ namespace Roslynator.CSharp.Analysis
                     {
                         ExpressionSyntax expression = GetGetAccessorExpression(accessor);
 
-                        if (expression?.IsKind(SyntaxKind.ElementAccessExpression) != true)
+                        if (!(expression is ElementAccessExpressionSyntax elementAccess))
                             return false;
-
-                        var elementAccess = (ElementAccessExpressionSyntax)expression;
 
                         if (elementAccess.Expression?.IsKind(SyntaxKind.BaseExpression) != true)
                             return false;

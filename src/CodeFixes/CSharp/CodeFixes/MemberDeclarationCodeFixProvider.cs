@@ -54,7 +54,8 @@ namespace Roslynator.CSharp.CodeFixes
                     CompilerDiagnosticIdentifiers.BaseTypeIsNotCLSCompliant,
                     CompilerDiagnosticIdentifiers.ArraysAsAttributeArgumentsIsNotCLSCompliant,
                     CompilerDiagnosticIdentifiers.ConstraintTypeIsNotCLSCompliant,
-                    CompilerDiagnosticIdentifiers.TypeIsNotCLSCompliantBecauseBaseInterfaceIsNotCLSCompliant);
+                    CompilerDiagnosticIdentifiers.TypeIsNotCLSCompliantBecauseBaseInterfaceIsNotCLSCompliant,
+                    CompilerDiagnosticIdentifiers.ExplicitInterfaceDeclarationIsNotMemberOfInterface);
             }
         }
 
@@ -160,7 +161,7 @@ namespace Roslynator.CSharp.CodeFixes
                                     }
                                 case SyntaxKind.EventFieldDeclaration:
                                     {
-                                        VariableDeclaratorSyntax declarator = ((EventFieldDeclarationSyntax)memberDeclaration).Declaration.Variables.First();
+                                        VariableDeclaratorSyntax declarator = ((EventFieldDeclarationSyntax)memberDeclaration).Declaration.Variables[0];
 
                                         var eventSymbol = (IEventSymbol)semanticModel.GetDeclaredSymbol(declarator, context.CancellationToken);
 
@@ -411,6 +412,24 @@ namespace Roslynator.CSharp.CodeFixes
                             context.RegisterCodeFix(codeAction, diagnostic);
                             break;
                         }
+                    case CompilerDiagnosticIdentifiers.ExplicitInterfaceDeclarationIsNotMemberOfInterface:
+                        {
+                            if (!Settings.IsEnabled(diagnostic.Id, CodeFixIdentifiers.AddParameterToExplicitlyImplementedInterfaceMember))
+                                break;
+
+                            var context2 = new CommonFixContext(
+                                context.Document,
+                                GetEquivalenceKey(diagnostic),
+                                await context.GetSemanticModelAsync().ConfigureAwait(false),
+                                context.CancellationToken);
+
+                            CodeAction codeAction = AddParameterToInterfaceMemberRefactoring.ComputeRefactoringForExplicitImplementation(context2, memberDeclaration);
+
+                            if (codeAction != null)
+                                context.RegisterCodeFix(codeAction, diagnostic);
+
+                            break;
+                        }
                 }
             }
         }
@@ -424,15 +443,13 @@ namespace Roslynator.CSharp.CodeFixes
             SemanticModel semanticModel,
             CancellationToken cancellationToken)
         {
-            MethodDeclarationSyntax newNode = methodDeclaration;
-
             var returnType = (TupleTypeSyntax)methodDeclaration.ReturnType;
 
-            SyntaxToken newIdentifier = SyntaxFactory.Identifier(newName).WithTriviaFrom(tupleElement.Identifier);
+            SyntaxToken newIdentifier = Identifier(newName).WithTriviaFrom(tupleElement.Identifier);
 
             SeparatedSyntaxList<TupleElementSyntax> newElements = returnType.Elements.Replace(tupleElement, tupleElement.WithIdentifier(newIdentifier));
 
-            newNode = methodDeclaration.WithReturnType(returnType.WithElements(newElements));
+            MethodDeclarationSyntax newNode = methodDeclaration.WithReturnType(returnType.WithElements(newElements));
 
             var rewriter = new RenameRewriter(fieldSymbol, newName, semanticModel, cancellationToken);
 
@@ -457,15 +474,12 @@ namespace Roslynator.CSharp.CodeFixes
             SemanticModel semanticModel,
             CancellationToken cancellationToken)
         {
-            PropertyDeclarationSyntax newNode = propertyDeclaration;
-
             var type = (TupleTypeSyntax)propertyDeclaration.Type;
 
-            SyntaxToken newIdentifier = SyntaxFactory.Identifier(newName).WithTriviaFrom(tupleElement.Identifier);
+            SyntaxToken newIdentifier = Identifier(newName).WithTriviaFrom(tupleElement.Identifier);
 
             SeparatedSyntaxList<TupleElementSyntax> newElements = type.Elements.Replace(tupleElement, tupleElement.WithIdentifier(newIdentifier));
-
-            newNode = propertyDeclaration.WithType(type.WithElements(newElements));
+            PropertyDeclarationSyntax newNode = propertyDeclaration.WithType(type.WithElements(newElements));
 
             var rewriter = new RenameRewriter(fieldSymbol, newName, semanticModel, cancellationToken);
 

@@ -27,7 +27,7 @@ namespace Roslynator.CSharp.Analysis
             context.RegisterSyntaxNodeAction(AnalyzeClassDeclaration, SyntaxKind.ClassDeclaration);
         }
 
-        public static void AnalyzeClassDeclaration(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeClassDeclaration(SyntaxNodeAnalysisContext context)
         {
             var classDeclaration = (ClassDeclarationSyntax)context.Node;
 
@@ -45,10 +45,8 @@ namespace Roslynator.CSharp.Analysis
 
             foreach (MemberDeclarationSyntax member in classDeclaration.Members)
             {
-                if (!member.IsKind(SyntaxKind.MethodDeclaration))
+                if (!(member is MethodDeclarationSyntax methodDeclaration))
                     continue;
-
-                var methodDeclaration = (MethodDeclarationSyntax)member;
 
                 if (!methodDeclaration.Modifiers.Contains(SyntaxKind.StaticKeyword))
                     continue;

@@ -98,6 +98,19 @@ namespace Roslynator
 
                         break;
                     }
+                case 'S':
+                    {
+                        if (HasPrefix(SA))
+                        {
+                            return SA;
+                        }
+                        else if (HasPrefix(SX))
+                        {
+                            return SX;
+                        }
+
+                        break;
+                    }
                 case 'U':
                     {
                         if (HasPrefix(U2U))

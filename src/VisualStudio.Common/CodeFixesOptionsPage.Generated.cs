@@ -8,17 +8,11 @@ namespace Roslynator.VisualStudio
 {
     public partial class CodeFixesOptionsPage
     {
-        protected override string DisabledByDefault
-        {
-            get;
-        }
-
-        = $"{CodeFixIdentifiers.RemoveReturnExpression},{CodeFixIdentifiers.RemoveReturnKeyword}";
         protected override string MaxId
         {
             get;
         }
 
-        = CodeFixIdentifiers.MakeFieldWritable;
+        = CodeFixIdentifiers.AddParameterToExplicitlyImplementedInterfaceMember;
     }
 }

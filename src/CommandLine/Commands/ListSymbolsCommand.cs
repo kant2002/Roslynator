@@ -28,14 +28,14 @@ namespace Roslynator.CommandLine
         public ListSymbolsCommand(
             ListSymbolsCommandLineOptions options,
             SymbolFilterOptions symbolFilterOptions,
-            SymbolDefinitionFormatOptions formatOptions,
+            WrapListOptions wrapListOptions,
             SymbolDefinitionListLayout layout,
             SymbolDefinitionPartFilter ignoredParts,
             in ProjectFilter projectFilter) : base(projectFilter)
         {
             Options = options;
             SymbolFilterOptions = symbolFilterOptions;
-            FormatOptions = formatOptions;
+            WrapListOptions = wrapListOptions;
             Layout = layout;
             IgnoredParts = ignoredParts;
         }
@@ -44,7 +44,7 @@ namespace Roslynator.CommandLine
 
         public SymbolFilterOptions SymbolFilterOptions { get; }
 
-        public SymbolDefinitionFormatOptions FormatOptions { get; }
+        public WrapListOptions WrapListOptions { get; }
 
         public SymbolDefinitionListLayout Layout { get; }
 
@@ -57,12 +57,12 @@ namespace Roslynator.CommandLine
             var format = new DefinitionListFormat(
                 layout: Layout,
                 parts: SymbolDefinitionPartFilter.All & ~IgnoredParts,
-                formatOptions: FormatOptions,
+                wrapListOptions: WrapListOptions,
                 groupByAssembly: Options.GroupByAssembly,
                 emptyLineBetweenMembers: Options.EmptyLineBetweenMembers,
                 emptyLineBetweenMemberGroups: true,
                 omitIEnumerable: true,
-                preferDefaultLiteral: true,
+                allowDefaultLiteral: true,
                 indentChars: Options.IndentChars);
 
             ImmutableArray<Compilation> compilations = await GetCompilationsAsync(projectOrSolution, cancellationToken);
@@ -71,7 +71,7 @@ namespace Roslynator.CommandLine
 
             HashSet<IAssemblySymbol> externalAssemblies = null;
 
-            foreach (string reference in Options.References)
+            foreach (string reference in Options.ExternalAssemblies)
             {
                 IAssemblySymbol externalAssembly = FindExternalAssembly(compilations, reference);
 
@@ -86,8 +86,6 @@ namespace Roslynator.CommandLine
 
             if (externalAssemblies != null)
                 assemblies = assemblies.Concat(externalAssemblies);
-
-            TestOutput(compilations, assemblies, format, cancellationToken);
 
             string text = null;
 
@@ -114,7 +112,7 @@ namespace Roslynator.CommandLine
             foreach (string path in Options.Output)
             {
                 WriteLine($"Save '{path}'", ConsoleColor.DarkGray, Verbosity.Diagnostic);
-
+#if DEBUG
                 string extension = Path.GetExtension(path);
 
                 if (string.Equals(extension, ".xml", StringComparison.OrdinalIgnoreCase))
@@ -129,10 +127,14 @@ namespace Roslynator.CommandLine
                 }
                 else if (string.Equals(extension, ".html", StringComparison.OrdinalIgnoreCase))
                 {
+                    SourceReferenceProvider sourceReferenceProvider = (!string.IsNullOrEmpty(Options.SourceReferences))
+                        ? SourceReferenceProvider.Load(Options.SourceReferences)
+                        : null;
+
                     var xmlWriterSettings = new XmlWriterSettings() { OmitXmlDeclaration = true, Indent = true, IndentChars = "" };
 
                     using (XmlWriter xmlWriter = XmlWriter.Create(path, xmlWriterSettings))
-                    using (SymbolDefinitionWriter writer = new SymbolDefinitionHtmlWriter(xmlWriter, SymbolFilterOptions, format, documentationProvider))
+                    using (SymbolDefinitionWriter writer = new SymbolDefinitionHtmlWriter(xmlWriter, SymbolFilterOptions, format, documentationProvider, sourceReferenceProvider))
                     {
                         writer.WriteDocument(assemblies, cancellationToken);
                     }
@@ -178,7 +180,12 @@ namespace Roslynator.CommandLine
                 {
                     File.WriteAllText(path, text, Encoding.UTF8);
                 }
+#else
+                File.WriteAllText(path, text, Encoding.UTF8);
+#endif
             }
+
+            TestOutput(compilations, assemblies, format, cancellationToken);
 
 #if DEBUG
             if (ShouldWrite(Verbosity.Normal))
@@ -191,8 +198,6 @@ namespace Roslynator.CommandLine
 #if DEBUG
         private static void WriteSummary(IEnumerable<IAssemblySymbol> assemblies, SymbolFilterOptions filter, Verbosity verbosity)
         {
-            WriteLine(verbosity);
-
             WriteLine($"{assemblies.Count()} assemblies", verbosity);
 
             INamedTypeSymbol[] types = assemblies
@@ -226,11 +231,9 @@ namespace Roslynator.CommandLine
                     SymbolGroup group = grouping.Key;
                     WriteLine($"      {grouping.Count()} {group.GetPluralText()}", verbosity);
 
-                    if (group == SymbolGroup.Class)
+                    if (group == SymbolGroup.Class || group == SymbolGroup.Module)
                         WriteLine($"        {grouping.Count(f => f.IsStatic)} static {group.GetPluralText()}", verbosity);
                 }
-
-                WriteLine(verbosity);
 
                 ISymbol[] members = types
                     .Where(f => f.TypeKind.Is(TypeKind.Class, TypeKind.Struct, TypeKind.Interface))
@@ -249,8 +252,6 @@ namespace Roslynator.CommandLine
                         if (group == SymbolGroup.Method)
                             WriteLine($"        {grouping.Count(f => f.IsKind(SymbolKind.Method) && ((IMethodSymbol)f).IsExtensionMethod)} extension {group.GetPluralText()}", verbosity);
                     }
-
-                    WriteLine(verbosity);
                 }
             }
         }

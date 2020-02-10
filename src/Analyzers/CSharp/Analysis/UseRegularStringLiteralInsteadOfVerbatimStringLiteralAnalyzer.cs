@@ -31,7 +31,7 @@ namespace Roslynator.CSharp.Analysis
             context.RegisterSyntaxNodeAction(AnalyzeInterpolatedStringExpression, SyntaxKind.InterpolatedStringExpression);
         }
 
-        public static void AnalyzeStringLiteralExpression(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeStringLiteralExpression(SyntaxNodeAnalysisContext context)
         {
             SyntaxNode node = context.Node;
 
@@ -58,7 +58,7 @@ namespace Roslynator.CSharp.Analysis
                 Location.Create(node.SyntaxTree, new TextSpan(node.SpanStart, 1)));
         }
 
-        public static void AnalyzeInterpolatedStringExpression(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeInterpolatedStringExpression(SyntaxNodeAnalysisContext context)
         {
             SyntaxNode node = context.Node;
 
@@ -72,6 +72,17 @@ namespace Roslynator.CSharp.Analysis
 
             if (!interpolatedString.IsVerbatim())
                 return;
+
+            foreach (InterpolatedStringContentSyntax content in interpolatedString.Contents)
+            {
+                if (content is InterpolationSyntax interpolation)
+                {
+                    string text = interpolation.FormatClause?.FormatStringToken.Text;
+
+                    if (text?.Contains("\\") == true)
+                        return;
+                }
+            }
 
             if (interpolatedString.SyntaxTree.IsMultiLineSpan(interpolatedString.Span, context.CancellationToken))
                 return;

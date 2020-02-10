@@ -195,7 +195,7 @@ namespace Roslynator.CSharp.Refactorings
 
             string propertyName = NameGenerator.Default.EnsureUniqueName(DefaultNames.DebuggerDisplayPropertyName, semanticModel, typeDeclaration.OpenBraceToken.Span.End);
 
-            AttributeArgumentSyntax argument = attribute.ArgumentList.Arguments.First();
+            AttributeArgumentSyntax argument = attribute.ArgumentList.Arguments[0];
 
             TypeDeclarationSyntax newTypeDeclaration = typeDeclaration.ReplaceNode(
                 argument,
@@ -235,7 +235,7 @@ namespace Roslynator.CSharp.Refactorings
 
             int i = 0;
 
-            int lastPos = i;
+            int lastPos;
 
             while (true)
             {

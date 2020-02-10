@@ -19,9 +19,9 @@ namespace Roslynator.CommandLine
             HelpText = "Indicates whether an empty line should be added between two member definitions.")]
         public bool EmptyLineBetweenMembers { get; set; }
 
-        [Option(longName: ParameterNames.Format,
-            HelpText = "Specifies parts of a symbol definition that should be formatted. Allowed values are attributes, parameters, base-list and constraints.")]
-        public IEnumerable<string> Format { get; set; }
+        [Option(longName: ParameterNames.WrapList,
+            HelpText = "Specifies syntax lists that should be wrapped. Allowed values are attributes, parameters, base-types and constraints.")]
+        public IEnumerable<string> WrapList { get; set; }
 
         [Option(longName: "group-by-assembly",
             HelpText = "Indicates whether symbols should be grouped by assembly.")]
@@ -33,7 +33,7 @@ namespace Roslynator.CommandLine
         public IEnumerable<string> IgnoredAttributes { get; set; }
 
         [Option(longName: ParameterNames.IgnoredParts,
-            HelpText = "Defines parts of a symbol definition that should be excluded. Allowed values are containing-namespace, attributes, assembly-attributes, attribute-arguments, accessibility, modifiers, parameter-name, parameter-default-value, base-type, base-interfaces, constraints, trailing-semicolon, trailing-comma.",
+            HelpText = "Defines parts of a symbol definition that should be excluded. Allowed values are containing-namespace, containing-namespace-in-type-hierarchy, attributes, assembly-attributes, attribute-arguments, accessibility, modifiers, parameter-name, parameter-default-value, base-type, base-interfaces, constraints, trailing-semicolon, trailing-comma.",
             MetaValue = "<IGNORED_PARTS>")]
         public IEnumerable<string> IgnoredParts { get; set; }
 
@@ -57,17 +57,22 @@ namespace Roslynator.CommandLine
         public string Layout { get; set; }
 
         [Option(shortName: 'o', longName: "output",
-            HelpText = "Defines path to file(s) that will store a list of symbol definitions. Available data formats are XML ('xml' extension), JSON ('json' extension), Markdown ('md' extension) or plain text format.",
+            HelpText = "Defines path to file(s) that will store a list of symbol definitions.",
             MetaValue = "<OUTPUT_FILE>")]
         public IEnumerable<string> Output { get; set; }
 
-        [Option(longName: "references",
-            HelpText = "Defines file name/path to assembly(ies) that should be included.",
+        [Option(longName: "external-assemblies",
+            HelpText = "Defines file name/path to external assemblies that should be included.",
                 MetaValue = "<ASSEMBLY_FILE>")]
-        public IEnumerable<string> References { get; set; }
+        public IEnumerable<string> ExternalAssemblies { get; set; }
+
+#if DEBUG
+        [Option(longName: "source-references")]
+        public string SourceReferences { get; set; }
+#endif
 
         [Option(longName: ParameterNames.Visibility,
-            Default = nameof(Roslynator.Visibility.Private),
+            Default = new string[] { nameof(Roslynator.Visibility.Public) },
             HelpText = "Defines one or more visibility of a type or a member. Allowed values are public, internal or private.",
             MetaValue = "<VISIBILITY>")]
         public IEnumerable<string> Visibility { get; set; }

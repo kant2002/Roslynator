@@ -20,25 +20,22 @@ roslynator generate-doc <PROJECT|SOLUTION>
 [--ignored-root-parts]
 [--ignored-type-parts]
 [--include-all-derived-types]
+[--include-containing-namespace]
 [--include-ienumerable]
 [--include-inherited-interface-members]
+[--include-system-namespace]
 [--inheritance-style]
 [--language]
 [--max-derived-types]
 [--msbuild-path]
-[--no-class-hierarchy]
 [--no-delete]
-[--no-format-base-list]
-[--no-format-constraints]
 [--no-mark-obsolete]
 [--no-precedence-for-system]
+[--no-wrap-base-types]
+[--no-wrap-constraints]
 [--omit-attribute-arguments]
-[--omit-containing-namespace-parts]
 [--omit-inherited-attributes]
-[--omit-member-constant-value]
-[--omit-member-implements]
-[--omit-member-inherited-from]
-[--omit-member-overrides]
+[--omit-member-parts]
 [--preferred-culture]
 [--projects]
 [-p|--properties]
@@ -91,7 +88,7 @@ Defines parts of a namespace documentation that should be excluded.
 
 Defines projects that should be skipped.
 
-**`[--ignored-root-parts]`** `{content namespaces classes static-classes structs interfaces enums delegates other}`
+**`[--ignored-root-parts]`** `{content namespaces class-hierarchy types other}`
 
 Defines parts of a root documentation that should be excluded.
 
@@ -103,6 +100,10 @@ Defines parts of a type documentation that should be excluded.
 
 Indicates whether all derived types should be included in the list of derived types. By default only types that directly inherits from a specified type are displayed.
 
+**`[--include-containing-namespace]`** `{class-hierarchy containing-type parameter return-type base-type attribute derived-type implemented-interface implemented-member exception see-also all}`
+
+Defines parts of a documentation that should include containing namespace.
+
 **`[--include-ienumerable]`**
 
 Indicates whether interface `System.Collections.IEnumerable` should be included in a documentation if a type also implements interface `System.Collections.Generic.IEnumerable<T>`.
@@ -110,6 +111,10 @@ Indicates whether interface `System.Collections.IEnumerable` should be included 
 **`[--include-inherited-interface-members]`**
 
 Indicates whether inherited interface members should be displayed in a list of members.
+
+**`[--include-system-namespace]`**
+
+Indicates whether namespace should be included when a type is directly contained in namespace 'System'.
 
 **`[--inheritance-style]`** `{horizontal|vertical}`
 
@@ -127,21 +132,9 @@ Defines maximum number derived types that should be displayed. Default value is 
 
 Defines a path to MSBuild. This option must be specified if there are multiple locations of MSBuild (usually multiple installations of Visual Studio).
 
-**`[--no-class-hierarchy]`**
-
-Indicates whether classes should be displayed as a list instead of hierarchy tree.
-
 **`[--no-delete]`**
 
 Indicates whether output directory should not be deleted at the beginning of the process.
-
-**`[--no-format-base-list]`**
-
-Indicates whether a base list should not be formatted on a multiple lines.
-
-**`[--no-format-constraints]`**
-
-Indicates whether constraints should not be formatted on a multiple lines.
 
 **`[--no-mark-obsolete]`**
 
@@ -151,35 +144,25 @@ Indicates whether obsolete types and members should not be marked as `[deprecate
 
 Indicates whether symbols contained in `System` namespace should be ordered as any other symbols and not before other symbols.
 
+**`[--no-wrap-base-list]`**
+
+Indicates whether base types should not be wrapped.
+
+**`[--no-wrap-constraints]`**
+
+Indicates whether constraints should not be wrapped.
+
 **`[--omit-attribute-arguments]`**
 
 Indicates whether attribute arguments should be omitted when displaying an attribute.
-
-**`[--omit-containing-namespace-parts]`** `{root containing-type return-type base-type attribute derived-type implemented-interface implemented-member exception see-also all}`
-
-Defines parts that that should by displayed without containing namespace.
-
-Indicates whether a containing namespace should be omitted when displaying type name.
 
 **`[--omit-inherited-attributes]`**
 
 Indicates whether inherited attributes should be omitted.
 
-**`[--omit-member-constant-value]`**
+**`[--omit-member-parts]`**
 
-Indicates whether a constant value of a member should be omitted.
-
-**`[--omit-member-implements]`**
-
-Indicates whether an interface member that is being implemented should be omitted.
-
-**`[--omit-member-inherited-from]`**
-
-Indicates whether a containing member of an inherited member should be omitted.
-
-**`[--omit-member-overrides]`**
-
-Indicates whether an overridden member should be omitted.
+Defines parts of member definition that should be omitted. Allowed values are constant-value, implements, inherited-from and overrides.
 
 **`[--preferred-culture]`** <CULTURE_ID>
 

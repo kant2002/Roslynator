@@ -225,7 +225,7 @@ namespace Roslynator.CSharp.Analysis.ReduceIfNesting
                     {
                         ifStatement = (IfStatementSyntax)parent;
 
-                        if (ifStatement.Parent is ElseClauseSyntax elseClause)
+                        if (ifStatement.IsParentKind(SyntaxKind.ElseClause))
                         {
                             if (ifStatement.Else != null)
                                 return Fail(parent);
@@ -345,11 +345,11 @@ namespace Roslynator.CSharp.Analysis.ReduceIfNesting
         {
             switch (statement)
             {
-                case BreakStatementSyntax breakStatement:
+                case BreakStatementSyntax _:
                     {
                         return SyntaxKind.BreakStatement;
                     }
-                case ContinueStatementSyntax continueStatement:
+                case ContinueStatementSyntax _:
                     {
                         return SyntaxKind.ContinueStatement;
                     }
@@ -429,7 +429,7 @@ namespace Roslynator.CSharp.Analysis.ReduceIfNesting
                 return false;
 
             return statements.Count > 1
-                || GetJumpKind(statements.First()) == SyntaxKind.None;
+                || GetJumpKind(statements[0]) == SyntaxKind.None;
         }
     }
 }

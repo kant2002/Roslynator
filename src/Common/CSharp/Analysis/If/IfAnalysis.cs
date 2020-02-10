@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Roslynator.CSharp.Syntax;
+using Roslynator.CSharp.SyntaxWalkers;
 using static Roslynator.CSharp.CSharpFactory;
 using static Roslynator.CSharp.CSharpFacts;
 
@@ -55,7 +56,7 @@ namespace Roslynator.CSharp.Analysis.If
 
             if (elseClause != null)
             {
-                if (!options.CheckSpanDirectives(ifStatement))
+                if (!CheckDirectivesAndComments(ifStatement, options))
                     return Empty;
 
                 StatementSyntax statement1 = ifStatement.SingleNonBlockStatementOrDefault();
@@ -455,7 +456,7 @@ namespace Roslynator.CSharp.Analysis.If
             if (!string.Equals(identifier1, declarator.Identifier.ValueText, StringComparison.Ordinal))
                 return Empty;
 
-            if (!options.CheckSpanDirectives(ifStatement.Parent, TextSpan.FromBounds(localDeclarationStatement.SpanStart, ifStatement.Span.End)))
+            if (!CheckDirectivesAndComments(localDeclarationStatement, ifStatement, options))
                 return Empty;
 
             if (IsNullLiteralConvertedToNullableOfT(assignment1.Right, semanticModel, cancellationToken)
@@ -479,34 +480,56 @@ namespace Roslynator.CSharp.Analysis.If
             if (!assignment.Success)
                 return Empty;
 
-            ElseClauseSyntax elseClause = ifStatement.Else;
-
-            if (elseClause?.Statement?.IsKind(SyntaxKind.IfStatement) != false)
-                return Empty;
-
             SimpleAssignmentStatementInfo assignment1 = SyntaxInfo.SimpleAssignmentStatementInfo(ifStatement.SingleNonBlockStatementOrDefault());
 
             if (!assignment1.Success)
                 return Empty;
 
-            SimpleAssignmentStatementInfo assignment2 = SyntaxInfo.SimpleAssignmentStatementInfo(elseClause.SingleNonBlockStatementOrDefault());
+            ElseClauseSyntax elseClause = ifStatement.Else;
 
-            if (!assignment2.Success)
+            ExpressionSyntax whenFalse;
+
+            if (elseClause != null)
+            {
+                if (elseClause.Statement.IsKind(SyntaxKind.IfStatement))
+                    return Empty;
+
+                SimpleAssignmentStatementInfo assignment2 = SyntaxInfo.SimpleAssignmentStatementInfo(elseClause.SingleNonBlockStatementOrDefault());
+
+                if (!assignment2.Success)
+                    return Empty;
+
+                whenFalse = assignment2.Right;
+
+                if (!AreEquivalent(assignment1.Left, assignment2.Left, assignment.Left))
+                    return Empty;
+            }
+            else
+            {
+                whenFalse = assignment.Right;
+
+                if (!AreEquivalent(assignment1.Left, assignment.Left))
+                    return Empty;
+            }
+
+            if (!CheckDirectivesAndComments(expressionStatement, ifStatement, options))
                 return Empty;
 
-            if (!AreEquivalent(assignment1.Left, assignment2.Left, assignment.Left))
-                return Empty;
+            ExpressionSyntax whenTrue = assignment1.Right;
 
-            if (!options.CheckSpanDirectives(ifStatement.Parent, TextSpan.FromBounds(expressionStatement.SpanStart, ifStatement.Span.End)))
-                return Empty;
-
-            if (IsNullLiteralConvertedToNullableOfT(assignment1.Right, semanticModel, cancellationToken)
-                || IsNullLiteralConvertedToNullableOfT(assignment2.Right, semanticModel, cancellationToken))
+            if (IsNullLiteralConvertedToNullableOfT(whenTrue, semanticModel, cancellationToken)
+                || IsNullLiteralConvertedToNullableOfT(whenFalse, semanticModel, cancellationToken))
             {
                 return Empty;
             }
 
-            return new AssignmentAndIfElseToAssignmentWithConditionalExpressionAnalysis(expressionStatement, assignment.Right, ifStatement, assignment1.Right, assignment2.Right, semanticModel).ToImmutableArray();
+            return new AssignmentAndIfToAssignmentWithConditionalExpressionAnalysis(
+                expressionStatement,
+                assignment.Right,
+                ifStatement,
+                whenTrue,
+                whenFalse,
+                semanticModel).ToImmutableArray();
         }
 
         private static ImmutableArray<IfAnalysis> Analyze(
@@ -526,7 +549,7 @@ namespace Roslynator.CSharp.Analysis.If
             if (statement?.IsKind(SyntaxKind.ReturnStatement) != true)
                 return Empty;
 
-            if (!options.CheckSpanDirectives(ifStatement, TextSpan.FromBounds(ifStatement.SpanStart, returnStatement.Span.End)))
+            if (!CheckDirectivesAndComments(ifStatement, returnStatement, options))
                 return Empty;
 
             return Analyze(
@@ -596,6 +619,77 @@ namespace Roslynator.CSharp.Analysis.If
                     .ConvertedType?
                     .OriginalDefinition
                     .SpecialType == SpecialType.System_Nullable_T;
+        }
+
+        public static bool CheckDirectivesAndComments(
+            SyntaxNode node1,
+            SyntaxNode node2,
+            AnalysisOptions options)
+        {
+            return CheckDirectivesAndComments(node1, options, includeTrailingTrivia: true)
+                && CheckDirectivesAndComments(node2, options, includeLeadingTrivia: true);
+        }
+
+        public static bool CheckDirectivesAndComments(
+            SyntaxNode node,
+            AnalysisOptions options,
+            bool includeLeadingTrivia = false,
+            bool includeTrailingTrivia = false)
+        {
+            if (!options.CanContainDirectives)
+            {
+                if (includeLeadingTrivia)
+                {
+                    if (includeTrailingTrivia)
+                    {
+                        if (node.ContainsDirectives)
+                            return false;
+                    }
+                    else if (node.SpanOrLeadingTriviaContainsDirectives())
+                    {
+                        return false;
+                    }
+                }
+                else if (includeTrailingTrivia)
+                {
+                    if (node.SpanOrTrailingTriviaContainsDirectives())
+                        return false;
+                }
+                else if (node.SpanContainsDirectives())
+                {
+                    return false;
+                }
+            }
+
+            if (!options.CanContainComments)
+            {
+                TextSpan span;
+
+                if (includeLeadingTrivia)
+                {
+                    if (includeTrailingTrivia)
+                    {
+                        span = node.FullSpan;
+                    }
+                    else
+                    {
+                        span = TextSpan.FromBounds(node.FullSpan.Start, node.Span.End);
+                    }
+                }
+                else if (includeTrailingTrivia)
+                {
+                    span = TextSpan.FromBounds(node.SpanStart, node.FullSpan.End);
+                }
+                else
+                {
+                    span = node.Span;
+                }
+
+                if (ContainsCommentWalker.ContainsComment(node, span))
+                    return false;
+            }
+
+            return true;
         }
     }
 }

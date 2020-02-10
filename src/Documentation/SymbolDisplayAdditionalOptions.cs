@@ -14,11 +14,10 @@ namespace Roslynator.Documentation
         IncludeAccessorAttributes = 8,
         IncludeAttributeArguments = 16,
         FormatAttributes = 32,
-        FormatBaseList = 64,
-        FormatConstraints = 128,
+        WrapBaseTypes = 64,
+        WrapConstraints = 128,
         FormatParameters = 256,
         OmitIEnumerable = 512,
-        PreferDefaultLiteral = 1024,
-        IncludeTrailingSemicolon = 2048,
+        IncludeTrailingSemicolon = 1024,
     }
 }

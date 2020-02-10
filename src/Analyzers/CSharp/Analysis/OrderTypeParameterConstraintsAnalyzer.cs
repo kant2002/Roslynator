@@ -28,7 +28,7 @@ namespace Roslynator.CSharp.Analysis
             context.RegisterSyntaxNodeAction(AnalyzeTypeParameterList, SyntaxKind.TypeParameterList);
         }
 
-        public static void AnalyzeTypeParameterList(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeTypeParameterList(SyntaxNodeAnalysisContext context)
         {
             var typeParameterList = (TypeParameterListSyntax)context.Node;
 
@@ -51,7 +51,7 @@ namespace Roslynator.CSharp.Analysis
 
             DiagnosticHelpers.ReportDiagnostic(context,
                 DiagnosticDescriptors.OrderTypeParameterConstraints,
-                genericInfo.ConstraintClauses.First());
+                genericInfo.ConstraintClauses[0]);
         }
 
         private static bool IsFixable(

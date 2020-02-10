@@ -18,7 +18,6 @@ namespace Roslynator.CSharp
         /// <param name="node"></param>
         /// <param name="walkDownParentheses"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static AsExpressionInfo AsExpressionInfo(
             SyntaxNode node,
             bool walkDownParentheses = true,
@@ -36,7 +35,6 @@ namespace Roslynator.CSharp
         /// <param name="binaryExpression"></param>
         /// <param name="walkDownParentheses"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static AsExpressionInfo AsExpressionInfo(
             BinaryExpressionSyntax binaryExpression,
             bool walkDownParentheses = true,
@@ -54,7 +52,6 @@ namespace Roslynator.CSharp
         /// <param name="node"></param>
         /// <param name="walkDownParentheses"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static AssignmentExpressionInfo AssignmentExpressionInfo(
             SyntaxNode node,
             bool walkDownParentheses = true,
@@ -69,7 +66,6 @@ namespace Roslynator.CSharp
         /// <param name="assignmentExpression"></param>
         /// <param name="walkDownParentheses"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static AssignmentExpressionInfo AssignmentExpressionInfo(
             AssignmentExpressionSyntax assignmentExpression,
             bool walkDownParentheses = true,
@@ -84,7 +80,6 @@ namespace Roslynator.CSharp
         /// <param name="node"></param>
         /// <param name="walkDownParentheses"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static BinaryExpressionInfo BinaryExpressionInfo(
             SyntaxNode node,
             bool walkDownParentheses = true,
@@ -102,7 +97,6 @@ namespace Roslynator.CSharp
         /// <param name="binaryExpression"></param>
         /// <param name="walkDownParentheses"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static BinaryExpressionInfo BinaryExpressionInfo(
             BinaryExpressionSyntax binaryExpression,
             bool walkDownParentheses = true,
@@ -120,14 +114,13 @@ namespace Roslynator.CSharp
         /// <param name="node"></param>
         /// <param name="walkDownParentheses"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static ConditionalExpressionInfo ConditionalExpressionInfo(
             SyntaxNode node,
             bool walkDownParentheses = true,
             bool allowMissing = false)
         {
-            return Syntax.ConditionalExpressionInfo.Create(
-                node,
+            return ConditionalExpressionInfo(
+                node as ConditionalExpressionSyntax,
                 walkDownParentheses,
                 allowMissing);
         }
@@ -138,7 +131,6 @@ namespace Roslynator.CSharp
         /// <param name="conditionalExpression"></param>
         /// <param name="walkDownParentheses"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static ConditionalExpressionInfo ConditionalExpressionInfo(
             ConditionalExpressionSyntax conditionalExpression,
             bool walkDownParentheses = true,
@@ -151,10 +143,43 @@ namespace Roslynator.CSharp
         }
 
         /// <summary>
+        /// Creates a new <see cref="Syntax.ConditionalStatementInfo"/> from the specified node.
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="walkDownParentheses"></param>
+        /// <param name="allowMissing"></param>
+        internal static ConditionalStatementInfo ConditionalStatementInfo(
+            SyntaxNode node,
+            bool walkDownParentheses = true,
+            bool allowMissing = false)
+        {
+            return ConditionalStatementInfo(
+                node as IfStatementSyntax,
+                walkDownParentheses,
+                allowMissing);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Syntax.ConditionalStatementInfo"/> from the specified 'if' statement.
+        /// </summary>
+        /// <param name="ifStatement"></param>
+        /// <param name="walkDownParentheses"></param>
+        /// <param name="allowMissing"></param>
+        internal static ConditionalStatementInfo ConditionalStatementInfo(
+            IfStatementSyntax ifStatement,
+            bool walkDownParentheses = true,
+            bool allowMissing = false)
+        {
+            return Syntax.ConditionalStatementInfo.Create(
+                ifStatement,
+                walkDownParentheses,
+                allowMissing);
+        }
+
+        /// <summary>
         /// Creates a new <see cref="Syntax.GenericInfo"/> from the specified node.
         /// </summary>
         /// <param name="node"></param>
-        /// <returns></returns>
         public static GenericInfo GenericInfo(SyntaxNode node)
         {
             return Syntax.GenericInfo.Create(node);
@@ -164,7 +189,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.GenericInfo"/> from the specified type parameter constraint.
         /// </summary>
         /// <param name="typeParameterConstraint"></param>
-        /// <returns></returns>
         public static GenericInfo GenericInfo(TypeParameterConstraintSyntax typeParameterConstraint)
         {
             return Syntax.GenericInfo.Create(typeParameterConstraint);
@@ -174,7 +198,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.GenericInfo"/> from the specified constraint clause.
         /// </summary>
         /// <param name="constraintClause"></param>
-        /// <returns></returns>
         public static GenericInfo GenericInfo(TypeParameterConstraintClauseSyntax constraintClause)
         {
             return Syntax.GenericInfo.Create(constraintClause);
@@ -184,7 +207,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.GenericInfo"/> from the specified type parameter.
         /// </summary>
         /// <param name="typeParameter"></param>
-        /// <returns></returns>
         public static GenericInfo GenericInfo(TypeParameterSyntax typeParameter)
         {
             return Syntax.GenericInfo.Create(typeParameter);
@@ -194,7 +216,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.GenericInfo"/> from the specified type parameter list.
         /// </summary>
         /// <param name="typeParameterList"></param>
-        /// <returns></returns>
         public static GenericInfo GenericInfo(TypeParameterListSyntax typeParameterList)
         {
             return Syntax.GenericInfo.Create(typeParameterList);
@@ -204,7 +225,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.GenericInfo"/> from the specified type declaration.
         /// </summary>
         /// <param name="typeDeclaration"></param>
-        /// <returns></returns>
         public static GenericInfo GenericInfo(TypeDeclarationSyntax typeDeclaration)
         {
             return Syntax.GenericInfo.Create(typeDeclaration);
@@ -214,7 +234,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.GenericInfo"/> from the specified delegate declaration.
         /// </summary>
         /// <param name="delegateDeclaration"></param>
-        /// <returns></returns>
         public static GenericInfo GenericInfo(DelegateDeclarationSyntax delegateDeclaration)
         {
             return Syntax.GenericInfo.Create(delegateDeclaration);
@@ -224,7 +243,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.GenericInfo"/> from the specified local function.
         /// </summary>
         /// <param name="localFunctionStatement"></param>
-        /// <returns></returns>
         public static GenericInfo GenericInfo(LocalFunctionStatementSyntax localFunctionStatement)
         {
             return Syntax.GenericInfo.Create(localFunctionStatement);
@@ -234,7 +252,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.GenericInfo"/> from the specified method declaration.
         /// </summary>
         /// <param name="methodDeclaration"></param>
-        /// <returns></returns>
         public static GenericInfo GenericInfo(MethodDeclarationSyntax methodDeclaration)
         {
             return Syntax.GenericInfo.Create(methodDeclaration);
@@ -256,7 +273,6 @@ namespace Roslynator.CSharp
         /// <param name="node"></param>
         /// <param name="walkDownParentheses"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static IsExpressionInfo IsExpressionInfo(
             SyntaxNode node,
             bool walkDownParentheses = true,
@@ -274,7 +290,6 @@ namespace Roslynator.CSharp
         /// <param name="binaryExpression"></param>
         /// <param name="walkDownParentheses"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static IsExpressionInfo IsExpressionInfo(
             BinaryExpressionSyntax binaryExpression,
             bool walkDownParentheses = true,
@@ -291,7 +306,6 @@ namespace Roslynator.CSharp
         /// </summary>
         /// <param name="localDeclarationStatement"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static LocalDeclarationStatementInfo LocalDeclarationStatementInfo(
             LocalDeclarationStatementSyntax localDeclarationStatement,
             bool allowMissing = false)
@@ -304,7 +318,6 @@ namespace Roslynator.CSharp
         /// </summary>
         /// <param name="value"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static LocalDeclarationStatementInfo LocalDeclarationStatementInfo(
             ExpressionSyntax value,
             bool allowMissing = false)
@@ -316,7 +329,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.MemberDeclarationListInfo"/> from the specified node.
         /// </summary>
         /// <param name="node"></param>
-        /// <returns></returns>
         public static MemberDeclarationListInfo MemberDeclarationListInfo(SyntaxNode node)
         {
             return Syntax.MemberDeclarationListInfo.Create(node);
@@ -326,7 +338,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.MemberDeclarationListInfo"/> from the specified compilation unit.
         /// </summary>
         /// <param name="compilationUnit"></param>
-        /// <returns></returns>
         public static MemberDeclarationListInfo MemberDeclarationListInfo(CompilationUnitSyntax compilationUnit)
         {
             return Syntax.MemberDeclarationListInfo.Create(compilationUnit);
@@ -336,7 +347,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.MemberDeclarationListInfo"/> from the specified declaration.
         /// </summary>
         /// <param name="declaration"></param>
-        /// <returns></returns>
         public static MemberDeclarationListInfo MemberDeclarationListInfo(NamespaceDeclarationSyntax declaration)
         {
             return Syntax.MemberDeclarationListInfo.Create(declaration);
@@ -346,7 +356,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.MemberDeclarationListInfo"/> from the specified declaration.
         /// </summary>
         /// <param name="declaration"></param>
-        /// <returns></returns>
         public static MemberDeclarationListInfo MemberDeclarationListInfo(TypeDeclarationSyntax declaration)
         {
             return Syntax.MemberDeclarationListInfo.Create(declaration);
@@ -356,7 +365,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.MemberDeclarationListInfo"/> from the specified declaration.
         /// </summary>
         /// <param name="declaration"></param>
-        /// <returns></returns>
         public static MemberDeclarationListInfo MemberDeclarationListInfo(ClassDeclarationSyntax declaration)
         {
             return Syntax.MemberDeclarationListInfo.Create(declaration);
@@ -366,7 +374,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.MemberDeclarationListInfo"/> from the specified declaration.
         /// </summary>
         /// <param name="declaration"></param>
-        /// <returns></returns>
         public static MemberDeclarationListInfo MemberDeclarationListInfo(StructDeclarationSyntax declaration)
         {
             return Syntax.MemberDeclarationListInfo.Create(declaration);
@@ -376,7 +383,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.MemberDeclarationListInfo"/> from the specified declaration.
         /// </summary>
         /// <param name="declaration"></param>
-        /// <returns></returns>
         public static MemberDeclarationListInfo MemberDeclarationListInfo(InterfaceDeclarationSyntax declaration)
         {
             return Syntax.MemberDeclarationListInfo.Create(declaration);
@@ -393,7 +399,6 @@ namespace Roslynator.CSharp
         /// <param name="node"></param>
         /// <param name="walkDownParentheses"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static SimpleMemberInvocationExpressionInfo SimpleMemberInvocationExpressionInfo(
             SyntaxNode node,
             bool walkDownParentheses = true,
@@ -410,7 +415,6 @@ namespace Roslynator.CSharp
         /// </summary>
         /// <param name="invocationExpression"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static SimpleMemberInvocationExpressionInfo SimpleMemberInvocationExpressionInfo(
             InvocationExpressionSyntax invocationExpression,
             bool allowMissing = false)
@@ -425,7 +429,6 @@ namespace Roslynator.CSharp
         /// </summary>
         /// <param name="node"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static SimpleMemberInvocationStatementInfo SimpleMemberInvocationStatementInfo(
             SyntaxNode node,
             bool allowMissing = false)
@@ -440,7 +443,6 @@ namespace Roslynator.CSharp
         /// </summary>
         /// <param name="expressionStatement"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static SimpleMemberInvocationStatementInfo SimpleMemberInvocationStatementInfo(
             ExpressionStatementSyntax expressionStatement,
             bool allowMissing = false)
@@ -455,7 +457,6 @@ namespace Roslynator.CSharp
         /// </summary>
         /// <param name="invocationExpression"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static SimpleMemberInvocationStatementInfo SimpleMemberInvocationStatementInfo(
             InvocationExpressionSyntax invocationExpression,
             bool allowMissing = false)
@@ -469,7 +470,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.ModifierListInfo"/> from the specified node.
         /// </summary>
         /// <param name="node"></param>
-        /// <returns></returns>
         public static ModifierListInfo ModifierListInfo(SyntaxNode node)
         {
             return Syntax.ModifierListInfo.Create(node);
@@ -479,7 +479,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.ModifierListInfo"/> from the specified class declaration.
         /// </summary>
         /// <param name="classDeclaration"></param>
-        /// <returns></returns>
         public static ModifierListInfo ModifierListInfo(ClassDeclarationSyntax classDeclaration)
         {
             return Syntax.ModifierListInfo.Create(classDeclaration);
@@ -489,7 +488,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.ModifierListInfo"/> from the specified constructor declaration.
         /// </summary>
         /// <param name="constructorDeclaration"></param>
-        /// <returns></returns>
         public static ModifierListInfo ModifierListInfo(ConstructorDeclarationSyntax constructorDeclaration)
         {
             return Syntax.ModifierListInfo.Create(constructorDeclaration);
@@ -499,7 +497,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.ModifierListInfo"/> from the specified conversion operator declaration.
         /// </summary>
         /// <param name="conversionOperatorDeclaration"></param>
-        /// <returns></returns>
         public static ModifierListInfo ModifierListInfo(ConversionOperatorDeclarationSyntax conversionOperatorDeclaration)
         {
             return Syntax.ModifierListInfo.Create(conversionOperatorDeclaration);
@@ -509,7 +506,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.ModifierListInfo"/> from the specified delegate declaration.
         /// </summary>
         /// <param name="delegateDeclaration"></param>
-        /// <returns></returns>
         public static ModifierListInfo ModifierListInfo(DelegateDeclarationSyntax delegateDeclaration)
         {
             return Syntax.ModifierListInfo.Create(delegateDeclaration);
@@ -519,7 +515,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.ModifierListInfo"/> from the specified destructor declaration.
         /// </summary>
         /// <param name="destructorDeclaration"></param>
-        /// <returns></returns>
         public static ModifierListInfo ModifierListInfo(DestructorDeclarationSyntax destructorDeclaration)
         {
             return Syntax.ModifierListInfo.Create(destructorDeclaration);
@@ -529,7 +524,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.ModifierListInfo"/> from the specified enum declaration.
         /// </summary>
         /// <param name="enumDeclaration"></param>
-        /// <returns></returns>
         public static ModifierListInfo ModifierListInfo(EnumDeclarationSyntax enumDeclaration)
         {
             return Syntax.ModifierListInfo.Create(enumDeclaration);
@@ -539,7 +533,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.ModifierListInfo"/> from the specified event declaration.
         /// </summary>
         /// <param name="eventDeclaration"></param>
-        /// <returns></returns>
         public static ModifierListInfo ModifierListInfo(EventDeclarationSyntax eventDeclaration)
         {
             return Syntax.ModifierListInfo.Create(eventDeclaration);
@@ -549,7 +542,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.ModifierListInfo"/> from the specified event field declaration.
         /// </summary>
         /// <param name="eventFieldDeclaration"></param>
-        /// <returns></returns>
         public static ModifierListInfo ModifierListInfo(EventFieldDeclarationSyntax eventFieldDeclaration)
         {
             return Syntax.ModifierListInfo.Create(eventFieldDeclaration);
@@ -559,7 +551,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.ModifierListInfo"/> from the specified field declaration.
         /// </summary>
         /// <param name="fieldDeclaration"></param>
-        /// <returns></returns>
         public static ModifierListInfo ModifierListInfo(FieldDeclarationSyntax fieldDeclaration)
         {
             return Syntax.ModifierListInfo.Create(fieldDeclaration);
@@ -569,7 +560,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.ModifierListInfo"/> from the specified indexer declaration.
         /// </summary>
         /// <param name="indexerDeclaration"></param>
-        /// <returns></returns>
         public static ModifierListInfo ModifierListInfo(IndexerDeclarationSyntax indexerDeclaration)
         {
             return Syntax.ModifierListInfo.Create(indexerDeclaration);
@@ -579,7 +569,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.ModifierListInfo"/> from the specified interface declaration.
         /// </summary>
         /// <param name="interfaceDeclaration"></param>
-        /// <returns></returns>
         public static ModifierListInfo ModifierListInfo(InterfaceDeclarationSyntax interfaceDeclaration)
         {
             return Syntax.ModifierListInfo.Create(interfaceDeclaration);
@@ -589,7 +578,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.ModifierListInfo"/> from the specified method declaration.
         /// </summary>
         /// <param name="methodDeclaration"></param>
-        /// <returns></returns>
         public static ModifierListInfo ModifierListInfo(MethodDeclarationSyntax methodDeclaration)
         {
             return Syntax.ModifierListInfo.Create(methodDeclaration);
@@ -599,7 +587,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.ModifierListInfo"/> from the specified operator declaration.
         /// </summary>
         /// <param name="operatorDeclaration"></param>
-        /// <returns></returns>
         public static ModifierListInfo ModifierListInfo(OperatorDeclarationSyntax operatorDeclaration)
         {
             return Syntax.ModifierListInfo.Create(operatorDeclaration);
@@ -609,7 +596,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.ModifierListInfo"/> from the specified property declaration.
         /// </summary>
         /// <param name="propertyDeclaration"></param>
-        /// <returns></returns>
         public static ModifierListInfo ModifierListInfo(PropertyDeclarationSyntax propertyDeclaration)
         {
             return Syntax.ModifierListInfo.Create(propertyDeclaration);
@@ -619,7 +605,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.ModifierListInfo"/> from the specified struct declaration.
         /// </summary>
         /// <param name="structDeclaration"></param>
-        /// <returns></returns>
         public static ModifierListInfo ModifierListInfo(StructDeclarationSyntax structDeclaration)
         {
             return Syntax.ModifierListInfo.Create(structDeclaration);
@@ -629,7 +614,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.ModifierListInfo"/> from the specified incomplete member.
         /// </summary>
         /// <param name="incompleteMember"></param>
-        /// <returns></returns>
         public static ModifierListInfo ModifierListInfo(IncompleteMemberSyntax incompleteMember)
         {
             return Syntax.ModifierListInfo.Create(incompleteMember);
@@ -639,7 +623,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.ModifierListInfo"/> from the specified accessor declaration.
         /// </summary>
         /// <param name="accessorDeclaration"></param>
-        /// <returns></returns>
         public static ModifierListInfo ModifierListInfo(AccessorDeclarationSyntax accessorDeclaration)
         {
             return Syntax.ModifierListInfo.Create(accessorDeclaration);
@@ -649,7 +632,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.ModifierListInfo"/> from the specified local declaration statement.
         /// </summary>
         /// <param name="localDeclarationStatement"></param>
-        /// <returns></returns>
         public static ModifierListInfo ModifierListInfo(LocalDeclarationStatementSyntax localDeclarationStatement)
         {
             return Syntax.ModifierListInfo.Create(localDeclarationStatement);
@@ -659,7 +641,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.ModifierListInfo"/> from the specified local function.
         /// </summary>
         /// <param name="localFunctionStatement"></param>
-        /// <returns></returns>
         public static ModifierListInfo ModifierListInfo(LocalFunctionStatementSyntax localFunctionStatement)
         {
             return Syntax.ModifierListInfo.Create(localFunctionStatement);
@@ -669,7 +650,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.ModifierListInfo"/> from the specified parameter.
         /// </summary>
         /// <param name="parameter"></param>
-        /// <returns></returns>
         public static ModifierListInfo ModifierListInfo(ParameterSyntax parameter)
         {
             return Syntax.ModifierListInfo.Create(parameter);
@@ -682,8 +662,6 @@ namespace Roslynator.CSharp
         /// <param name="allowedStyles"></param>
         /// <param name="walkDownParentheses"></param>
         /// <param name="allowMissing"></param>
-        /// 
-        /// <returns></returns>
         public static NullCheckExpressionInfo NullCheckExpressionInfo(
             SyntaxNode node,
             NullCheckStyles allowedStyles = NullCheckStyles.ComparisonToNull | NullCheckStyles.IsPattern,
@@ -706,7 +684,6 @@ namespace Roslynator.CSharp
         /// <param name="walkDownParentheses"></param>
         /// <param name="allowMissing"></param>
         /// <param name="cancellationToken"></param>
-        /// <returns></returns>
         public static NullCheckExpressionInfo NullCheckExpressionInfo(
             SyntaxNode node,
             SemanticModel semanticModel,
@@ -803,7 +780,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.RegionInfo"/> from the specified region directive.
         /// </summary>
         /// <param name="regionDirective"></param>
-        /// <returns></returns>
         public static RegionInfo RegionInfo(RegionDirectiveTriviaSyntax regionDirective)
         {
             return Syntax.RegionInfo.Create(regionDirective);
@@ -813,7 +789,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.RegionInfo"/> from the specified endregion directive.
         /// </summary>
         /// <param name="endRegionDirective"></param>
-        /// <returns></returns>
         public static RegionInfo RegionInfo(EndRegionDirectiveTriviaSyntax endRegionDirective)
         {
             return Syntax.RegionInfo.Create(endRegionDirective);
@@ -825,7 +800,6 @@ namespace Roslynator.CSharp
         /// <param name="node"></param>
         /// <param name="walkDownParentheses"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static SimpleAssignmentExpressionInfo SimpleAssignmentExpressionInfo(
             SyntaxNode node,
             bool walkDownParentheses = true,
@@ -840,7 +814,6 @@ namespace Roslynator.CSharp
         /// <param name="assignmentExpression"></param>
         /// <param name="walkDownParentheses"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static SimpleAssignmentExpressionInfo SimpleAssignmentExpressionInfo(
             AssignmentExpressionSyntax assignmentExpression,
             bool walkDownParentheses = true,
@@ -855,7 +828,6 @@ namespace Roslynator.CSharp
         /// <param name="statement"></param>
         /// <param name="walkDownParentheses"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static SimpleAssignmentStatementInfo SimpleAssignmentStatementInfo(
             StatementSyntax statement,
             bool walkDownParentheses = true,
@@ -870,7 +842,6 @@ namespace Roslynator.CSharp
         /// <param name="assignmentExpression"></param>
         /// <param name="walkDownParentheses"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static SimpleAssignmentStatementInfo SimpleAssignmentStatementInfo(
             AssignmentExpressionSyntax assignmentExpression,
             bool walkDownParentheses = true,
@@ -885,7 +856,6 @@ namespace Roslynator.CSharp
         /// <param name="expressionStatement"></param>
         /// <param name="walkDownParentheses"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static SimpleAssignmentStatementInfo SimpleAssignmentStatementInfo(
             ExpressionStatementSyntax expressionStatement,
             bool walkDownParentheses = true,
@@ -895,27 +865,11 @@ namespace Roslynator.CSharp
         }
 
         /// <summary>
-        /// Creates a new <see cref="Syntax.SimpleIfElseInfo"/> from the specified if statement.
-        /// </summary>
-        /// <param name="ifStatement"></param>
-        /// <param name="walkDownParentheses"></param>
-        /// <param name="allowMissing"></param>
-        /// <returns></returns>
-        public static SimpleIfElseInfo SimpleIfElseInfo(
-            IfStatementSyntax ifStatement,
-            bool walkDownParentheses = true,
-            bool allowMissing = false)
-        {
-            return Syntax.SimpleIfElseInfo.Create(ifStatement, walkDownParentheses, allowMissing);
-        }
-
-        /// <summary>
         /// Creates a new <see cref="Syntax.SimpleIfStatementInfo"/> from the specified node.
         /// </summary>
         /// <param name="node"></param>
         /// <param name="walkDownParentheses"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static SimpleIfStatementInfo SimpleIfStatementInfo(
             SyntaxNode node,
             bool walkDownParentheses = true,
@@ -930,7 +884,6 @@ namespace Roslynator.CSharp
         /// <param name="ifStatement"></param>
         /// <param name="walkDownParentheses"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static SimpleIfStatementInfo SimpleIfStatementInfo(
             IfStatementSyntax ifStatement,
             bool walkDownParentheses = true,
@@ -940,11 +893,22 @@ namespace Roslynator.CSharp
         }
 
         /// <summary>
+        /// Creates a new <see cref="Syntax.SingleLocalDeclarationStatementInfo"/> from the specified statement.
+        /// </summary>
+        /// <param name="statement"></param>
+        /// <param name="allowMissing"></param>
+        public static SingleLocalDeclarationStatementInfo SingleLocalDeclarationStatementInfo(
+            StatementSyntax statement,
+            bool allowMissing = false)
+        {
+            return Syntax.SingleLocalDeclarationStatementInfo.Create(statement, allowMissing);
+        }
+
+        /// <summary>
         /// Creates a new <see cref="Syntax.SingleLocalDeclarationStatementInfo"/> from the specified local declaration statement.
         /// </summary>
         /// <param name="localDeclarationStatement"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static SingleLocalDeclarationStatementInfo SingleLocalDeclarationStatementInfo(
             LocalDeclarationStatementSyntax localDeclarationStatement,
             bool allowMissing = false)
@@ -957,7 +921,6 @@ namespace Roslynator.CSharp
         /// </summary>
         /// <param name="variableDeclaration"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static SingleLocalDeclarationStatementInfo SingleLocalDeclarationStatementInfo(
             VariableDeclarationSyntax variableDeclaration,
             bool allowMissing = false)
@@ -969,7 +932,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.SingleLocalDeclarationStatementInfo"/> from the specified value.
         /// </summary>
         /// <param name="value"></param>
-        /// <returns></returns>
         public static SingleLocalDeclarationStatementInfo SingleLocalDeclarationStatementInfo(ExpressionSyntax value)
         {
             return Syntax.SingleLocalDeclarationStatementInfo.Create(value);
@@ -981,7 +943,6 @@ namespace Roslynator.CSharp
         /// <param name="node"></param>
         /// <param name="walkDownParentheses"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static SingleParameterLambdaExpressionInfo SingleParameterLambdaExpressionInfo(
             SyntaxNode node,
             bool walkDownParentheses = true,
@@ -995,7 +956,6 @@ namespace Roslynator.CSharp
         /// </summary>
         /// <param name="lambdaExpression"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         public static SingleParameterLambdaExpressionInfo SingleParameterLambdaExpressionInfo(
             LambdaExpressionSyntax lambdaExpression,
             bool allowMissing = false)
@@ -1006,11 +966,10 @@ namespace Roslynator.CSharp
         /// <summary>
         /// Creates a new <see cref="Syntax.StatementListInfo"/> from the specified statement.
         /// </summary>
-        /// <param name="statement"></param>
-        /// <returns></returns>
-        public static StatementListInfo StatementListInfo(StatementSyntax statement)
+        /// <param name="statementInList"></param>
+        public static StatementListInfo StatementListInfo(StatementSyntax statementInList)
         {
-            return Syntax.StatementListInfo.Create(statement);
+            return Syntax.StatementListInfo.Create(statementInList);
         }
 
         internal static StatementListInfo StatementListInfo(StatementListSelection selectedStatements)
@@ -1025,7 +984,6 @@ namespace Roslynator.CSharp
         /// <param name="semanticModel"></param>
         /// <param name="walkDownParentheses"></param>
         /// <param name="cancellationToken"></param>
-        /// <returns></returns>
         public static StringConcatenationExpressionInfo StringConcatenationExpressionInfo(
             SyntaxNode node,
             SemanticModel semanticModel,
@@ -1041,7 +999,6 @@ namespace Roslynator.CSharp
         /// <param name="binaryExpression"></param>
         /// <param name="semanticModel"></param>
         /// <param name="cancellationToken"></param>
-        /// <returns></returns>
         public static StringConcatenationExpressionInfo StringConcatenationExpressionInfo(
             BinaryExpressionSyntax binaryExpression,
             SemanticModel semanticModel,
@@ -1056,7 +1013,6 @@ namespace Roslynator.CSharp
         /// <param name="expressionChain"></param>
         /// <param name="semanticModel"></param>
         /// <param name="cancellationToken"></param>
-        /// <returns></returns>
         public static StringConcatenationExpressionInfo StringConcatenationExpressionInfo(
             in ExpressionChain expressionChain,
             SemanticModel semanticModel,
@@ -1070,7 +1026,6 @@ namespace Roslynator.CSharp
         /// </summary>
         /// <param name="node"></param>
         /// <param name="walkDownParentheses"></param>
-        /// <returns></returns>
         public static StringLiteralExpressionInfo StringLiteralExpressionInfo(
             SyntaxNode node,
             bool walkDownParentheses = true)
@@ -1082,7 +1037,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.StringLiteralExpressionInfo"/> from the specified literal expression.
         /// </summary>
         /// <param name="literalExpression"></param>
-        /// <returns></returns>
         public static StringLiteralExpressionInfo StringLiteralExpressionInfo(LiteralExpressionSyntax literalExpression)
         {
             return Syntax.StringLiteralExpressionInfo.Create(literalExpression);
@@ -1093,7 +1047,6 @@ namespace Roslynator.CSharp
         /// </summary>
         /// <param name="constraint"></param>
         /// <param name="allowMissing"></param>
-        /// <returns></returns>
         internal static TypeParameterConstraintInfo TypeParameterConstraintInfo(TypeParameterConstraintSyntax constraint, bool allowMissing = false)
         {
             return Syntax.TypeParameterConstraintInfo.Create(constraint, allowMissing);
@@ -1103,7 +1056,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.UsingDirectiveListInfo"/> from the specified node.
         /// </summary>
         /// <param name="node"></param>
-        /// <returns></returns>
         public static UsingDirectiveListInfo UsingDirectiveListInfo(SyntaxNode node)
         {
             return Syntax.UsingDirectiveListInfo.Create(node);
@@ -1113,7 +1065,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.UsingDirectiveListInfo"/> from the specified compilation unit.
         /// </summary>
         /// <param name="compilationUnit"></param>
-        /// <returns></returns>
         public static UsingDirectiveListInfo UsingDirectiveListInfo(CompilationUnitSyntax compilationUnit)
         {
             return Syntax.UsingDirectiveListInfo.Create(compilationUnit);
@@ -1123,7 +1074,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.UsingDirectiveListInfo"/> from the specified declaration.
         /// </summary>
         /// <param name="declaration"></param>
-        /// <returns></returns>
         public static UsingDirectiveListInfo UsingDirectiveListInfo(NamespaceDeclarationSyntax declaration)
         {
             return Syntax.UsingDirectiveListInfo.Create(declaration);
@@ -1133,7 +1083,6 @@ namespace Roslynator.CSharp
         /// Creates a new <see cref="Syntax.XmlElementInfo"/> from the specified xml node.
         /// </summary>
         /// <param name="xmlNode"></param>
-        /// <returns></returns>
         public static XmlElementInfo XmlElementInfo(XmlNodeSyntax xmlNode)
         {
             return Syntax.XmlElementInfo.Create(xmlNode);

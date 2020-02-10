@@ -41,10 +41,11 @@ namespace Roslynator.CodeGeneration.CSharp
                         SimpleMemberAccessExpression(
                             SimpleMemberAccessExpression(
                                 IdentifierName("x"),
-                                IdentifierName("ContainingType")), IdentifierName("Name")),
+                                IdentifierName("ContainingType")),
+                            IdentifierName("Name")),
                         GenerateSections().ToSyntaxList().Add(DefaultSwitchSection(Block(ThrowNewInvalidOperationException()))))));
 
-            IEnumerable<SwitchSectionSyntax> GenerateSections()
+            static IEnumerable<SwitchSectionSyntax> GenerateSections()
             {
                 foreach (INamedTypeSymbol typeSymbol in Symbols.SyntaxSymbols)
                 {
@@ -61,7 +62,7 @@ namespace Roslynator.CodeGeneration.CSharp
                     }
                 }
 
-                IEnumerable<SwitchSectionSyntax> GenerateSections2(INamedTypeSymbol typeSymbol)
+                static IEnumerable<SwitchSectionSyntax> GenerateSections2(INamedTypeSymbol typeSymbol)
                 {
                     int i = 0;
 

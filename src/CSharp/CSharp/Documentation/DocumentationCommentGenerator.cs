@@ -258,7 +258,7 @@ namespace Roslynator.CSharp.Documentation
             bool canGenerateReturns = false,
             DocumentationCommentGeneratorSettings settings = null)
         {
-            settings = settings ?? DocumentationCommentGeneratorSettings.Default;
+            settings ??= DocumentationCommentGeneratorSettings.Default;
 
             ImmutableArray<string> summary = settings.Summary;
 
@@ -586,7 +586,7 @@ namespace Roslynator.CSharp.Documentation
                                     }
                                     catch (XmlException ex)
                                     {
-                                        Debug.Fail(ex.ToString());
+                                        Debug.Fail(symbol.ToDisplayString() + "\r\n\r\n" + ex.ToString());
                                         return null;
                                     }
                                 }

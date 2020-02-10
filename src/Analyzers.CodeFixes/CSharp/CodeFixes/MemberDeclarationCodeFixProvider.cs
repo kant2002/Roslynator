@@ -28,14 +28,14 @@ namespace Roslynator.CSharp.CodeFixes
                 return ImmutableArray.Create(
                     DiagnosticIdentifiers.FormatDeclarationBraces,
                     DiagnosticIdentifiers.RemoveRedundantOverridingMember,
-                    DiagnosticIdentifiers.AddDefaultAccessModifier,
+                    DiagnosticIdentifiers.AddAccessibilityModifiers,
                     DiagnosticIdentifiers.RemoveRedundantSealedModifier,
                     DiagnosticIdentifiers.AvoidSemicolonAtEndOfDeclaration,
                     DiagnosticIdentifiers.OrderModifiers,
-                    DiagnosticIdentifiers.MarkFieldAsReadOnly,
+                    DiagnosticIdentifiers.MakeFieldReadOnly,
                     DiagnosticIdentifiers.UseConstantInsteadOfField,
                     DiagnosticIdentifiers.UseReadOnlyAutoProperty,
-                    DiagnosticIdentifiers.ReplaceCommentWithDocumentationComment,
+                    DiagnosticIdentifiers.ConvertCommentToDocumentationComment,
                     DiagnosticIdentifiers.MakeMethodExtensionMethod);
             }
         }
@@ -68,14 +68,14 @@ namespace Roslynator.CSharp.CodeFixes
                             context.RegisterCodeFix(codeAction, diagnostic);
                             break;
                         }
-                    case DiagnosticIdentifiers.AddDefaultAccessModifier:
+                    case DiagnosticIdentifiers.AddAccessibilityModifiers:
                         {
                             var accessibility = (Accessibility)Enum.Parse(
                                 typeof(Accessibility),
                                 diagnostic.Properties[nameof(Accessibility)]);
 
                             CodeAction codeAction = CodeAction.Create(
-                                "Add default access modifier",
+                                "Add accessibility modifiers",
                                 cancellationToken => AddDefaultAccessModifierRefactoring.RefactorAsync(context.Document, memberDeclaration, accessibility, cancellationToken),
                                 GetEquivalenceKey(diagnostic));
 
@@ -107,15 +107,15 @@ namespace Roslynator.CSharp.CodeFixes
                             context.RegisterCodeFix(codeAction, diagnostic);
                             break;
                         }
-                    case DiagnosticIdentifiers.MarkFieldAsReadOnly:
+                    case DiagnosticIdentifiers.MakeFieldReadOnly:
                         {
                             var fieldDeclaration = (FieldDeclarationSyntax)memberDeclaration;
 
                             SeparatedSyntaxList<VariableDeclaratorSyntax> declarators = fieldDeclaration.Declaration.Variables;
 
                             string title = (declarators.Count == 1)
-                                ? $"Mark '{declarators[0].Identifier.ValueText}' as read-only"
-                                : "Mark fields as read-only";
+                                ? $"Make '{declarators[0].Identifier.ValueText}' read-only"
+                                : "Make fields read-only";
 
                             ModifiersCodeFixRegistrator.AddModifier(context, diagnostic, fieldDeclaration, SyntaxKind.ReadOnlyKeyword, title: title);
                             break;
@@ -140,11 +140,11 @@ namespace Roslynator.CSharp.CodeFixes
                             context.RegisterCodeFix(codeAction, diagnostic);
                             break;
                         }
-                    case DiagnosticIdentifiers.ReplaceCommentWithDocumentationComment:
+                    case DiagnosticIdentifiers.ConvertCommentToDocumentationComment:
                         {
                             CodeAction codeAction = CodeAction.Create(
-                                ReplaceCommentWithDocumentationCommentRefactoring.Title,
-                                cancellationToken => ReplaceCommentWithDocumentationCommentRefactoring.RefactorAsync(context.Document, memberDeclaration, context.Span, cancellationToken),
+                                ConvertCommentToDocumentationCommentRefactoring.Title,
+                                cancellationToken => ConvertCommentToDocumentationCommentRefactoring.RefactorAsync(context.Document, memberDeclaration, context.Span, cancellationToken),
                                 GetEquivalenceKey(diagnostic));
 
                             context.RegisterCodeFix(codeAction, diagnostic);

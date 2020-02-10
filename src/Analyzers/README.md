@@ -20,18 +20,19 @@
 | RCS1015 | [Use nameof operator](../../docs/analyzers/RCS1015.md) | Maintainability | Info |
 | RCS1016 | [Use expression-bodied member](../../docs/analyzers/RCS1016.md) | Usage | None |
 | RCS1017 | [Avoid multiline expression body](../../docs/analyzers/RCS1017.md) | Style | None |
-| RCS1018 | [Add default access modifier](../../docs/analyzers/RCS1018.md) | Readability | Info |
+| RCS1018 | [Add accessibility modifiers](../../docs/analyzers/RCS1018.md) | Readability | Info |
 | RCS1019 | [Order modifiers](../../docs/analyzers/RCS1019.md) | Readability | None |
 | RCS1020 | [Simplify Nullable\<T> to T?](../../docs/analyzers/RCS1020.md) | Simplification | Info |
 | RCS1021 | [Simplify lambda expression](../../docs/analyzers/RCS1021.md) | Simplification | Info |
-| RCS1023 | [Format empty block](../../docs/analyzers/RCS1023.md) | Formatting | None |
+| RCS1023 | [Format empty block](../../docs/analyzers/RCS1023.md) | Formatting | Hidden |
 | RCS1024 | [Format accessor list](../../docs/analyzers/RCS1024.md) | Formatting | None |
 | RCS1025 | [Add new line before enum member](../../docs/analyzers/RCS1025.md) | Formatting | None |
 | RCS1026 | [Add new line before statement](../../docs/analyzers/RCS1026.md) | Formatting | None |
 | RCS1027 | [Add new line before embedded statement](../../docs/analyzers/RCS1027.md) | Formatting | None |
 | RCS1028 | [Add new line after switch label](../../docs/analyzers/RCS1028.md) | Formatting | None |
-| RCS1029 | [Format binary operator on next line](../../docs/analyzers/RCS1029.md) | Formatting | Info |
+| RCS1029 | [Format binary operator on next line](../../docs/analyzers/RCS1029.md) | Formatting | None |
 | RCS1030 | [Add empty line after embedded statement](../../docs/analyzers/RCS1030.md) | Formatting | None |
+| RCS1031 | [Remove unnecessary braces](../../docs/analyzers/RCS1031.md) | Redundancy | Hidden |
 | RCS1032 | [Remove redundant parentheses](../../docs/analyzers/RCS1032.md) | Redundancy | Info |
 | RCS1033 | [Remove redundant boolean literal](../../docs/analyzers/RCS1033.md) | Redundancy | Info |
 | RCS1034 | [Remove redundant 'sealed' modifier](../../docs/analyzers/RCS1034.md) | Redundancy | Hidden |
@@ -71,7 +72,7 @@
 | RCS1070 | [Remove redundant default switch section](../../docs/analyzers/RCS1070.md) | Redundancy | Hidden |
 | RCS1071 | [Remove redundant base constructor call](../../docs/analyzers/RCS1071.md) | Redundancy | Hidden |
 | RCS1072 | [Remove empty namespace declaration](../../docs/analyzers/RCS1072.md) | Redundancy | Info |
-| RCS1073 | [Replace if statement with return statement](../../docs/analyzers/RCS1073.md) | Simplification | Info |
+| RCS1073 | [Convert 'if' to 'return' statement](../../docs/analyzers/RCS1073.md) | Simplification | Info |
 | RCS1074 | [Remove redundant constructor](../../docs/analyzers/RCS1074.md) | Redundancy | Hidden |
 | RCS1075 | [Avoid empty catch clause that catches System.Exception](../../docs/analyzers/RCS1075.md) | Design | Warning |
 | RCS1076 | [Format declaration braces](../../docs/analyzers/RCS1076.md) | Formatting | Hidden |
@@ -98,7 +99,7 @@
 | RCS1100 | [Format documentation summary on a single line](../../docs/analyzers/RCS1100.md) | Formatting | None |
 | RCS1101 | [Format documentation summary on multiple lines](../../docs/analyzers/RCS1101.md) | Formatting | None |
 | RCS1102 | [Make class static](../../docs/analyzers/RCS1102.md) | Design | Warning |
-| RCS1103 | [Replace if statement with assignment](../../docs/analyzers/RCS1103.md) | Simplification | Info |
+| RCS1103 | [Convert 'if' to assignment](../../docs/analyzers/RCS1103.md) | Simplification | Info |
 | RCS1104 | [Simplify conditional expression](../../docs/analyzers/RCS1104.md) | Simplification | Info |
 | RCS1105 | [Unncessary interpolation](../../docs/analyzers/RCS1105.md) | Simplification | Info |
 | RCS1106 | [Remove empty destructor](../../docs/analyzers/RCS1106.md) | Redundancy | Info |
@@ -130,7 +131,6 @@
 | RCS1143 | [Simplify coalesce expression](../../docs/analyzers/RCS1143.md) | Simplification | Hidden |
 | RCS1145 | [Remove redundant 'as' operator](../../docs/analyzers/RCS1145.md) | Redundancy | Hidden |
 | RCS1146 | [Use conditional access](../../docs/analyzers/RCS1146.md) | Usage | Info |
-| RCS1150 | [Call string.Concat instead of string.Join](../../docs/analyzers/RCS1150.md) | Simplification | Info |
 | RCS1151 | [Remove redundant cast](../../docs/analyzers/RCS1151.md) | Redundancy | Hidden |
 | RCS1153 | [Add empty line after closing brace](../../docs/analyzers/RCS1153.md) | Formatting | None |
 | RCS1154 | [Sort enum members](../../docs/analyzers/RCS1154.md) | Readability | Info |
@@ -146,8 +146,8 @@
 | RCS1164 | [Unused type parameter](../../docs/analyzers/RCS1164.md) | Redundancy | Info |
 | RCS1165 | [Unconstrained type parameter checked for null](../../docs/analyzers/RCS1165.md) | Usage | Hidden |
 | RCS1166 | [Value type object is never equal to null](../../docs/analyzers/RCS1166.md) | Usage | Info |
-| RCS1168 | [Parameter name differs from base name](../../docs/analyzers/RCS1168.md) | Maintainability | Warning |
-| RCS1169 | [Mark field as read-only](../../docs/analyzers/RCS1169.md) | Design | Info |
+| RCS1168 | [Parameter name differs from base name](../../docs/analyzers/RCS1168.md) | Maintainability | Hidden |
+| RCS1169 | [Make field read-only](../../docs/analyzers/RCS1169.md) | Design | Info |
 | RCS1170 | [Use read-only auto-implemented property](../../docs/analyzers/RCS1170.md) | Design | Info |
 | RCS1171 | [Simplify lazy initialization](../../docs/analyzers/RCS1171.md) | Simplification | Info |
 | RCS1172 | [Use 'is' operator instead of 'as' operator](../../docs/analyzers/RCS1172.md) | Simplification | Warning |
@@ -156,10 +156,9 @@
 | RCS1175 | [Unused this parameter](../../docs/analyzers/RCS1175.md) | Redundancy | Info |
 | RCS1176 | [Use 'var' instead of explicit type (when the type is not obvious)](../../docs/analyzers/RCS1176.md) | Simplification | None |
 | RCS1177 | [Use 'var' instead of explicit type (in foreach)](../../docs/analyzers/RCS1177.md) | Simplification | None |
-| RCS1178 | [Call Debug.Fail instead of Debug.Assert](../../docs/analyzers/RCS1178.md) | Usage | Info |
 | RCS1179 | [Use return instead of assignment](../../docs/analyzers/RCS1179.md) | Simplification | Info |
 | RCS1180 | [Inline lazy initialization](../../docs/analyzers/RCS1180.md) | Simplification | Info |
-| RCS1181 | [Replace comment with documentation comment](../../docs/analyzers/RCS1181.md) | General | Hidden |
+| RCS1181 | [Convert comment to documentation comment](../../docs/analyzers/RCS1181.md) | General | Hidden |
 | RCS1182 | [Remove redundant base interface](../../docs/analyzers/RCS1182.md) | Redundancy | Hidden |
 | RCS1183 | [Format initializer with single expression on single line](../../docs/analyzers/RCS1183.md) | Formatting | Hidden |
 | RCS1184 | [Format conditional expression (format ? and : on next line)](../../docs/analyzers/RCS1184.md) | Formatting | None |
@@ -195,7 +194,7 @@
 | RCS1214 | [Unnecessary interpolated string](../../docs/analyzers/RCS1214.md) | Simplification | Info |
 | RCS1215 | [Expression is always equal to true/false](../../docs/analyzers/RCS1215.md) | Redundancy | Warning |
 | RCS1216 | [Unnecessary unsafe context](../../docs/analyzers/RCS1216.md) | Redundancy | Info |
-| RCS1217 | [Replace interpolated string with concatenation](../../docs/analyzers/RCS1217.md) | Readability | Hidden |
+| RCS1217 | [Convert interpolated string to concatenation](../../docs/analyzers/RCS1217.md) | Readability | Hidden |
 | RCS1218 | [Simplify code branching](../../docs/analyzers/RCS1218.md) | Readability | Info |
 | RCS1219 | [Call 'Enumerable.Skip' and 'Enumerable.Any' instead of 'Enumerable.Count'](../../docs/analyzers/RCS1219.md) | Performance | None |
 | RCS1220 | [Use pattern matching instead of combination of 'is' operator and cast operator](../../docs/analyzers/RCS1220.md) | Usage | Info |
@@ -213,6 +212,13 @@
 | RCS1232 | [Order elements in documentation comment](../../docs/analyzers/RCS1232.md) | Readability | Info |
 | RCS1233 | [Use short-circuiting operator](../../docs/analyzers/RCS1233.md) | Usage | Info |
 | RCS1234 | [Duplicate enum value](../../docs/analyzers/RCS1234.md) | Readability | Info |
+| RCS1235 | [Optimize method call](../../docs/analyzers/RCS1235.md) | Performance | Info |
+| RCS1236 | [Use exception filter](../../docs/analyzers/RCS1236.md) | Usage | Info |
+| RCS1237 | [Use bit shift operator](../../docs/analyzers/RCS1237.md) | Usage | Hidden |
+| RCS1238 | [Avoid nested ?: operators](../../docs/analyzers/RCS1238.md) | Readability | Hidden |
+| RCS1239 | [Use 'for' statement instead of 'while' statement](../../docs/analyzers/RCS1239.md) | Readability | Info |
+| RCS1240 | [Operator is unnecessary](../../docs/analyzers/RCS1240.md) | Redundancy | Info |
+| RCS1241 | [Implement non-generic counterpart](../../docs/analyzers/RCS1241.md) | Design | Hidden |
 
 
 *\(Generated with [DotMarkdown](http://github.com/JosefPihrt/DotMarkdown)\)*

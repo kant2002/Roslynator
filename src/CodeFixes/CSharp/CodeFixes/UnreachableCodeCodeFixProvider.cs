@@ -93,14 +93,23 @@ namespace Roslynator.CSharp.CodeFixes
                     {
                         var ifStatement = (IfStatementSyntax)node;
 
-                        StatementSyntax statement = ifStatement.Else?.Statement;
+                        ElseClauseSyntax elseClause = ifStatement.Else;
+
+                        if (elseClause != null
+                            && ifStatement.IsParentKind(SyntaxKind.ElseClause))
+                        {
+                            return CodeAction.Create(
+                                Title,
+                                cz => document.ReplaceNodeAsync(ifStatement.Parent, elseClause, cz),
+                                GetEquivalenceKey(diagnostic));
+                        }
+
+                        StatementSyntax statement = elseClause?.Statement;
 
                         if (statement != null)
                         {
-                            if (statement.IsKind(SyntaxKind.Block))
+                            if (statement is BlockSyntax block)
                             {
-                                var block = (BlockSyntax)statement;
-
                                 SyntaxList<StatementSyntax> statements = block.Statements;
 
                                 if (statements.Any())
@@ -133,10 +142,8 @@ namespace Roslynator.CSharp.CodeFixes
 
                                 if (statement != null)
                                 {
-                                    if (statement.IsKind(SyntaxKind.Block))
+                                    if (statement is BlockSyntax block)
                                     {
-                                        var block = (BlockSyntax)statement;
-
                                         SyntaxList<StatementSyntax> statements = block.Statements;
 
                                         if (statements.Any())
@@ -170,7 +177,7 @@ namespace Roslynator.CSharp.CodeFixes
                 Title,
                 cancellationToken =>
                 {
-                    StatementSyntax firstStatement = statements.First();
+                    StatementSyntax firstStatement = statements[0];
 
                     StatementSyntax newFirstStatement = firstStatement
                         .WithLeadingTrivia(ifStatement.GetLeadingTrivia().AddRange(firstStatement.GetLeadingTrivia().EmptyIfWhitespace()));

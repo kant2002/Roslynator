@@ -89,7 +89,7 @@ namespace Roslynator.CSharp.CodeFixes
 
         private static IfStatementSyntax CreateNewIfStatement(IfStatementSyntax ifStatement)
         {
-            IEnumerable<ExpressionStatementSyntax> statements = ifStatement
+            IEnumerable<StatementSyntax> statements = ifStatement
                 .AsCascade()
                 .Select(ifOrElse =>
                 {
@@ -98,16 +98,21 @@ namespace Roslynator.CSharp.CodeFixes
                     if (statement is BlockSyntax block)
                         statement = block.Statements.Last();
 
-                    return (ExpressionStatementSyntax)statement;
+                    return statement;
                 });
 
             return ifStatement.ReplaceNodes(
                 statements,
-                (expressionStatement, _) =>
+                (statement, _) =>
                 {
+                    if (statement.IsKind(SyntaxKind.ThrowStatement))
+                        return statement;
+
+                    var expressionStatement = (ExpressionStatementSyntax)statement;
+
                     var assignment = (AssignmentExpressionSyntax)expressionStatement.Expression;
 
-                    return ReturnStatement(assignment.Right).WithTriviaFrom(expressionStatement);
+                    return ReturnStatement(assignment.Right).WithTriviaFrom(statement);
                 });
         }
 
@@ -139,9 +144,14 @@ namespace Roslynator.CSharp.CodeFixes
 
             return switchStatement.WithSections(newSections);
 
-            SwitchSectionSyntax CreateNewSection(SwitchSectionSyntax section)
+            static SwitchSectionSyntax CreateNewSection(SwitchSectionSyntax section)
             {
-                var expressionStatement = (ExpressionStatementSyntax)section.GetStatements().LastButOne();
+                SyntaxList<StatementSyntax> statements = section.GetStatements();
+
+                if (statements.Last().IsKind(SyntaxKind.ThrowStatement))
+                    return section;
+
+                var expressionStatement = (ExpressionStatementSyntax)statements.LastButOne();
 
                 var assignment = (AssignmentExpressionSyntax)expressionStatement.Expression;
 

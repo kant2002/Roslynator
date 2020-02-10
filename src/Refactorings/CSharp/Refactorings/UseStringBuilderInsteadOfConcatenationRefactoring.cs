@@ -71,17 +71,15 @@ namespace Roslynator.CSharp.Refactorings
             ExpressionSyntax newInvocation = null;
             foreach (ExpressionSyntax expression in concatenationInfo.AsChain())
             {
-                if (expression.IsKind(SyntaxKind.InterpolatedStringExpression))
+                if (expression is InterpolatedStringExpressionSyntax interpolatedString)
                 {
-                    var interpolatedString = (InterpolatedStringExpressionSyntax)expression;
-
                     bool isVerbatim = interpolatedString.IsVerbatim();
 
                     SyntaxList<InterpolatedStringContentSyntax> contents = interpolatedString.Contents;
 
                     for (int j = 0; j < contents.Count; j++)
                     {
-                        (SyntaxKind contentKind, string methodName, ImmutableArray<ArgumentSyntax> arguments) = ConvertInterpolatedStringToStringBuilderMethodRefactoring.Refactor(contents[j], isVerbatim);
+                        (SyntaxKind _, string methodName, ImmutableArray<ArgumentSyntax> arguments) = ConvertInterpolatedStringToStringBuilderMethodRefactoring.Refactor(contents[j], isVerbatim);
 
                         newInvocation = SimpleMemberInvocationExpression(
                             newInvocation ?? stringBuilderName,

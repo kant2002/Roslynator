@@ -48,7 +48,8 @@ namespace Roslynator.CSharp.Refactorings
                     }
                 }
             }
-            else if (context.IsRefactoringEnabled(RefactoringIdentifiers.InvertIf))
+            else if (context.IsRefactoringEnabled(RefactoringIdentifiers.InvertIf)
+                && ifStatement.IsTopmostIf())
             {
                 InvertIfAnalysis analysis = InvertIfAnalysis.Create(ifStatement, statement);
 
@@ -132,7 +133,7 @@ namespace Roslynator.CSharp.Refactorings
             }
             else
             {
-                IfStatementSyntax lastIfStatement = ifStatement;
+                IfStatementSyntax lastIfStatement;
 
                 InvertIfAnalysis a = analysis.AnalyzeNextStatement();
 
@@ -336,7 +337,7 @@ namespace Roslynator.CSharp.Refactorings
                         i++;
                     }
 
-                    lastStatement = lastStatement ?? next;
+                    lastStatement ??= next;
                 }
             }
 
