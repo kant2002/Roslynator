@@ -2,8 +2,8 @@
 <Analyzers>
   <Analyzer Identifier="DuplicateWordInComment" IsDevelopment="true">
     <Id>RCS1243</Id>
-    <Title>Duplicate word in comment.</Title>
-    <MessageFormat>Duplicate word in comment.</MessageFormat>
+    <Title>Duplicate word in a comment.</Title>
+    <MessageFormat>Duplicate word in a comment.</MessageFormat>
     <Category>General</Category>
     <DefaultSeverity>Info</DefaultSeverity>
     <IsEnabledByDefault>true</IsEnabledByDefault>

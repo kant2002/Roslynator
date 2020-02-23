@@ -24,7 +24,7 @@ namespace Roslynator.CSharp.CodeFixes
         {
             SyntaxNode root = await context.GetSyntaxRootAsync().ConfigureAwait(false);
 
-            if (!TryFindToken( root, context.Span.Start, out SyntaxToken token, findInsideTrivia: true))
+            if (!TryFindToken(root, context.Span.Start, out SyntaxToken token, findInsideTrivia: true))
                 return;
 
             string s = token.Text;

@@ -2646,8 +2646,8 @@ namespace Roslynator.CSharp
         /// <summary>RCS1243</summary>
         public static readonly DiagnosticDescriptor DuplicateWordInComment = Factory.Create(
             id:                 DiagnosticIdentifiers.DuplicateWordInComment, 
-            title:              "Duplicate word in comment.", 
-            messageFormat:      "Duplicate word in comment.", 
+            title:              "Duplicate word in a comment.", 
+            messageFormat:      "Duplicate word in a comment.", 
             category:           DiagnosticCategories.General, 
             defaultSeverity:    DiagnosticSeverity.Info, 
             isEnabledByDefault: true, 
