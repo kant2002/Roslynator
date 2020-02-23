@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Analyzers>
+  <Analyzer Identifier="DoNotPassNonReadOnlyStructByReadOnlyReference">
+    <Id>RCS1242</Id>
+    <Title>Do not pass non-read-only struct by read-only reference.</Title>
+    <MessageFormat>Do not pass non-read-only struct by read-only reference.</MessageFormat>
+    <Category>Performance</Category>
+    <DefaultSeverity>Warning</DefaultSeverity>
+    <IsEnabledByDefault>true</IsEnabledByDefault>
+    <SupportsFadeOut>false</SupportsFadeOut>
+    <SupportsFadeOutAnalyzer>false</SupportsFadeOutAnalyzer>
+    <MinLanguageVersion>7.2</MinLanguageVersion>
+    <Summary></Summary>
+    <Samples>
+      <Sample>
+        <Before>
+          <![CDATA[struct C
+{
+    void M(in C c) // [|Id|]
+    {
+    }
+}]]>
+        </Before>
+        <After>
+          <![CDATA[struct C
+{
+    void M(C c)
+    {
+    }
+}]]>
+        </After>
+      </Sample>
+    </Samples>
+  </Analyzer>
+</Analyzers>
