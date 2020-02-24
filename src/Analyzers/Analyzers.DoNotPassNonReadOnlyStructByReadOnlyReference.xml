@@ -31,5 +31,15 @@
         </After>
       </Sample>
     </Samples>
+    <Links>
+      <Link>
+        <Url>https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/in-parameter-modifier</Url>
+        <Text>in parameter modifier (C# Reference)</Text>
+      </Link>
+      <Link>
+        <Url>https://devblogs.microsoft.com/premier-developer/the-in-modifier-and-the-readonly-structs-in-c/</Url>
+        <Text>The ‘in’-modifier and the readonly structs in C#</Text>
+      </Link>
+    </Links>
   </Analyzer>
 </Analyzers>
