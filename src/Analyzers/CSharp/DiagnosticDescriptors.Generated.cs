@@ -664,7 +664,7 @@ namespace Roslynator.CSharp
             messageFormat:      "Add empty line between declarations.", 
             category:           DiagnosticCategories.Formatting, 
             defaultSeverity:    DiagnosticSeverity.Info, 
-            isEnabledByDefault: true, 
+            isEnabledByDefault: false, 
             description:        null, 
             helpLinkUri:        DiagnosticIdentifiers.AddEmptyLineBetweenDeclarations, 
             customTags:         Array.Empty<string>());
@@ -1623,18 +1623,6 @@ namespace Roslynator.CSharp
             isEnabledByDefault: true, 
             description:        null, 
             helpLinkUri:        DiagnosticIdentifiers.UseStringComparison, 
-            customTags:         Array.Empty<string>());
-
-        /// <summary>RCS1156</summary>
-        public static readonly DiagnosticDescriptor UseStringLengthInsteadOfComparisonWithEmptyString = Factory.Create(
-            id:                 DiagnosticIdentifiers.UseStringLengthInsteadOfComparisonWithEmptyString, 
-            title:              "Use string.Length instead of comparison with empty string.", 
-            messageFormat:      "Use string.Length instead of comparison with empty string.", 
-            category:           DiagnosticCategories.Usage, 
-            defaultSeverity:    DiagnosticSeverity.Info, 
-            isEnabledByDefault: true, 
-            description:        null, 
-            helpLinkUri:        DiagnosticIdentifiers.UseStringLengthInsteadOfComparisonWithEmptyString, 
             customTags:         Array.Empty<string>());
 
         /// <summary>RCS1157</summary>
