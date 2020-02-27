@@ -73,8 +73,8 @@ namespace Roslynator.CommandLine
                                 writer.WriteWhitespace(" ");
                                 writer.WriteComment($" {title} ");
                             }
-                        }
-                        while (en.MoveNext());
+
+                        } while (en.MoveNext());
 
                         writer.WriteWhitespace(writer.Settings.NewLineChars);
                         writer.WriteWhitespace(writer.Settings.IndentChars);
@@ -83,7 +83,7 @@ namespace Roslynator.CommandLine
                 }
             }
 
-            string GetAction(DiagnosticDescriptor diagnosticDescriptor)
+            static string GetAction(DiagnosticDescriptor diagnosticDescriptor)
             {
                 return (diagnosticDescriptor.IsEnabledByDefault)
                     ? diagnosticDescriptor.DefaultSeverity.ToString()

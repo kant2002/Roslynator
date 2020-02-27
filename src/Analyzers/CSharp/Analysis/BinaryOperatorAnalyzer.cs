@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Josef Pihrt. All rights reserved. Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
 using Microsoft.CodeAnalysis;
@@ -44,7 +45,44 @@ namespace Roslynator.CSharp.Analysis
                 startContext.RegisterSyntaxNodeAction(AnalyzeLessThanOrEqualExpression, SyntaxKind.LessThanOrEqualExpression);
                 startContext.RegisterSyntaxNodeAction(AnalyzeGreaterThanOrEqualExpression, SyntaxKind.GreaterThanOrEqualExpression);
                 startContext.RegisterSyntaxNodeAction(AnalyzeLogicalOrExpression, SyntaxKind.LogicalOrExpression);
+
+                if (!startContext.IsAnalyzerSuppressed(DiagnosticDescriptors.ExpressionIsAlwaysEqualToTrueOrFalse))
+                {
+                    startContext.RegisterSyntaxNodeAction(AnalyzeSimpleMemberAccessExpression, SyntaxKind.SimpleMemberAccessExpression);
+                }
             });
+        }
+
+        // x == double.NaN >>> double.IsNaN(x)
+        // x != double.NaN >>> !double.IsNaN(x)
+        private void AnalyzeSimpleMemberAccessExpression(SyntaxNodeAnalysisContext context)
+        {
+            var simpleMemberAccess = (MemberAccessExpressionSyntax)context.Node;
+
+            if (!(simpleMemberAccess.Name is IdentifierNameSyntax identifierName))
+                return;
+
+            if (identifierName.Identifier.ValueText != "NaN")
+                return;
+
+            ExpressionSyntax expression = simpleMemberAccess.WalkUpParentheses();
+
+            SyntaxNode binaryExpression = expression.Parent;
+
+            if (!binaryExpression.IsKind(SyntaxKind.EqualsExpression, SyntaxKind.NotEqualsExpression))
+                return;
+
+            ISymbol symbol = context.SemanticModel.GetSymbol(simpleMemberAccess, context.CancellationToken);
+
+            if (symbol?.ContainingType?.SpecialType != SpecialType.System_Double)
+                return;
+
+            DiagnosticHelpers.ReportDiagnostic(
+                context,
+                DiagnosticDescriptors.ExpressionIsAlwaysEqualToTrueOrFalse,
+                binaryExpression.GetLocation(),
+                ImmutableDictionary.CreateRange(new KeyValuePair<string, string>[] { new KeyValuePair<string, string>("DoubleNaN", (((BinaryExpressionSyntax)binaryExpression).Left == expression) ? "Right" : "Left") }),
+                (binaryExpression.IsKind(SyntaxKind.EqualsExpression)) ? "false" : "true");
         }
 
         // x:
@@ -59,7 +97,7 @@ namespace Roslynator.CSharp.Analysis
 
         // x >= 0 >>> true
         // 0 >= x >>> 0 == x
-        public static void AnalyzeGreaterThanOrEqualExpression(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeGreaterThanOrEqualExpression(SyntaxNodeAnalysisContext context)
         {
             var greaterThanOrEqualExpression = (BinaryExpressionSyntax)context.Node;
 
@@ -81,7 +119,7 @@ namespace Roslynator.CSharp.Analysis
         }
 
         // 0 > x >>> false
-        public static void AnalyzeGreaterThanExpression(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeGreaterThanExpression(SyntaxNodeAnalysisContext context)
         {
             var greaterThanExpression = (BinaryExpressionSyntax)context.Node;
 
@@ -98,7 +136,7 @@ namespace Roslynator.CSharp.Analysis
 
         // 0 <= x >>> true
         // x <= 0 >>> x == 0
-        public static void AnalyzeLessThanOrEqualExpression(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeLessThanOrEqualExpression(SyntaxNodeAnalysisContext context)
         {
             var lessThanOrEqualExpression = (BinaryExpressionSyntax)context.Node;
 
@@ -120,7 +158,7 @@ namespace Roslynator.CSharp.Analysis
         }
 
         // x < 0 >>> false
-        public static void AnalyzeLessThanExpression(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeLessThanExpression(SyntaxNodeAnalysisContext context)
         {
             var lessThanExpression = (BinaryExpressionSyntax)context.Node;
 

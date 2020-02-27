@@ -10,7 +10,6 @@ using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 using Roslynator.CodeGeneration.Markdown;
-using Roslynator.CodeGeneration.Xml;
 using Roslynator.Metadata;
 using Roslynator.Utilities;
 
@@ -41,6 +40,7 @@ namespace Roslynator.CodeGeneration
 
             ImmutableArray<AnalyzerMetadata> analyzers = metadata.Analyzers;
             ImmutableArray<AnalyzerMetadata> codeAnalysisAnalyzers = metadata.CodeAnalysisAnalyzers;
+            ImmutableArray<AnalyzerMetadata> formattingAnalyzers = metadata.FormattingAnalyzers;
             ImmutableArray<RefactoringMetadata> refactorings = metadata.Refactorings;
             ImmutableArray<CodeFixMetadata> codeFixes = metadata.CodeFixes;
             ImmutableArray<CompilerDiagnosticMetadata> compilerDiagnostics = metadata.CompilerDiagnostics;
@@ -49,9 +49,11 @@ namespace Roslynator.CodeGeneration
 
             WriteAnalyzersReadMe(@"CodeAnalysis.Analyzers\README.md", codeAnalysisAnalyzers);
 
+            WriteAnalyzersReadMe(@"Formatting.Analyzers\README.md", formattingAnalyzers);
+
             WriteAnalyzersByCategory(@"Analyzers\AnalyzersByCategory.md", analyzers);
 #if !DEBUG
-            VisualStudioInstance instance = MSBuildLocator.QueryVisualStudioInstances().First(f => f.Version.Major == 15);
+            VisualStudioInstance instance = MSBuildLocator.QueryVisualStudioInstances().First(f => f.Version.Major == 16);
 
             MSBuildLocator.RegisterInstance(instance);
 
@@ -78,11 +80,19 @@ namespace Roslynator.CodeGeneration
                 MetadataFile.SaveSourceFiles(sourceFiles, @"..\SourceFiles.xml");
             }
 #endif
-            foreach (AnalyzerMetadata analyzer in analyzers.Concat(codeAnalysisAnalyzers))
+            foreach (AnalyzerMetadata analyzer in codeAnalysisAnalyzers)
             {
                 WriteAllText(
                     $@"..\docs\analyzers\{analyzer.Id}.md",
                     MarkdownGenerator.CreateAnalyzerMarkdown(analyzer, new (string, string)[] { ("Roslynator.CodeAnalysis.Analyzers", "https://www.nuget.org/packages/Roslynator.CodeAnalysis.Analyzers") }),
+                    fileMustExists: false);
+            }
+
+            foreach (AnalyzerMetadata analyzer in analyzers.Concat(formattingAnalyzers))
+            {
+                WriteAllText(
+                    $@"..\docs\analyzers\{analyzer.Id}.md",
+                    MarkdownGenerator.CreateAnalyzerMarkdown(analyzer, new (string, string)[] { ("Roslynator.Formatting.Analyzers", "https://www.nuget.org/packages/Roslynator.Formatting.Analyzers") }),
                     fileMustExists: false);
             }
 
@@ -122,14 +132,6 @@ namespace Roslynator.CodeGeneration
                 @"CodeFixes\README.md",
                 MarkdownGenerator.CreateCodeFixesReadMe(compilerDiagnostics, comparer));
 
-            WriteAllText(
-                "DefaultConfigFile.xml",
-                XmlGenerator.CreateDefaultConfigFile(refactorings, codeFixes));
-
-            WriteAllText(
-                "default.ruleset",
-                XmlGenerator.CreateDefaultRuleSet(analyzers));
-
             // find files to delete
             foreach (string path in Directory.EnumerateFiles(GetPath(@"..\docs\refactorings")))
             {
@@ -143,7 +145,8 @@ namespace Roslynator.CodeGeneration
             // find missing samples
             foreach (RefactoringMetadata refactoring in refactorings)
             {
-                if (refactoring.Samples.Count == 0)
+                if (!refactoring.IsObsolete
+                    && refactoring.Samples.Count == 0)
                 {
                     foreach (ImageMetadata image in refactoring.ImagesOrDefaultImage())
                     {

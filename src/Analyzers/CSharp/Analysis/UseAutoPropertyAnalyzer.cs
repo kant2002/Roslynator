@@ -43,7 +43,7 @@ namespace Roslynator.CSharp.Analysis
             });
         }
 
-        public static void AnalyzePropertyDeclaration(SyntaxNodeAnalysisContext context)
+        private static void AnalyzePropertyDeclaration(SyntaxNodeAnalysisContext context)
         {
             var property = (PropertyDeclarationSyntax)context.Node;
 
@@ -340,7 +340,7 @@ namespace Roslynator.CSharp.Analysis
 
             return null;
 
-            IdentifierNameSyntax GetIdentifierName(ExpressionSyntax expression)
+            static IdentifierNameSyntax GetIdentifierName(ExpressionSyntax expression)
             {
                 if (expression?.Kind() == SyntaxKind.SimpleAssignmentExpression)
                 {
@@ -641,14 +641,15 @@ namespace Roslynator.CSharp.Analysis
 
                 if (walker != null)
                 {
+                    Debug.Assert(walker.FieldSymbol == null);
+                    Debug.Assert(walker.SemanticModel == null);
+                    Debug.Assert(walker.CancellationToken == default);
+
                     _cachedInstance = null;
-                }
-                else
-                {
-                    walker = new UseAutoPropertyWalker();
+                    return walker;
                 }
 
-                return walker;
+                return new UseAutoPropertyWalker();
             }
 
             public static void Free(UseAutoPropertyWalker walker)

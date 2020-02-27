@@ -31,7 +31,7 @@ namespace Roslynator.CSharp.Analysis
             context.RegisterSyntaxNodeAction(AnalyzeCastExpression, SyntaxKind.CastExpression);
         }
 
-        public static void AnalyzeCastExpression(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeCastExpression(SyntaxNodeAnalysisContext context)
         {
             var castExpression = (CastExpressionSyntax)context.Node;
 
@@ -72,10 +72,12 @@ namespace Roslynator.CSharp.Analysis
             if (expressionTypeSymbol.TypeKind == TypeKind.Interface)
                 return;
 
-            if (typeSymbol.TypeKind != TypeKind.Interface
-                && !typeSymbol.EqualsOrInheritsFrom(expressionTypeSymbol, includeInterfaces: true))
+            if (expressionTypeSymbol.SpecialType == SpecialType.System_Object
+                || expressionTypeSymbol.TypeKind == TypeKind.Dynamic
+                || typeSymbol.TypeKind != TypeKind.Interface)
             {
-                return;
+                if (!typeSymbol.EqualsOrInheritsFrom(expressionTypeSymbol, includeInterfaces: true))
+                    return;
             }
 
             ISymbol accessedSymbol = semanticModel.GetSymbol(accessedExpression, cancellationToken);

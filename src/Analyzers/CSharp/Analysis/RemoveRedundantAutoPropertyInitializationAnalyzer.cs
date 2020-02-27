@@ -27,7 +27,7 @@ namespace Roslynator.CSharp.Analysis
             context.RegisterSyntaxNodeAction(AnalyzePropertyDeclaration, SyntaxKind.PropertyDeclaration);
         }
 
-        public static void AnalyzePropertyDeclaration(SyntaxNodeAnalysisContext context)
+        private static void AnalyzePropertyDeclaration(SyntaxNodeAnalysisContext context)
         {
             if (context.Node.ContainsDiagnostics)
                 return;
@@ -38,7 +38,7 @@ namespace Roslynator.CSharp.Analysis
 
             ExpressionSyntax value = initializer?.Value?.WalkDownParentheses();
 
-            if (value == null)
+            if (value?.IsKind(SyntaxKind.SuppressNullableWarningExpression) != false)
                 return;
 
             if (initializer.SpanOrLeadingTriviaContainsDirectives())

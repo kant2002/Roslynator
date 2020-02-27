@@ -24,7 +24,7 @@ namespace Roslynator.CSharp
         public const string UseNameOfOperator = "RCS1015";
         public const string UseExpressionBodiedMember = "RCS1016";
         public const string AvoidMultilineExpressionBody = "RCS1017";
-        public const string AddDefaultAccessModifier = "RCS1018";
+        public const string AddAccessibilityModifiers = "RCS1018";
         public const string OrderModifiers = "RCS1019";
         public const string SimplifyNullableOfT = "RCS1020";
         public const string SimplifyLambdaExpression = "RCS1021";
@@ -90,7 +90,7 @@ namespace Roslynator.CSharp
         public const string UseLinefeedAsNewLine = "RCS1086";
         public const string UseCarriageReturnAndLinefeedAsNewLine = "RCS1087";
         public const string UseSpacesInsteadOfTab = "RCS1088";
-        public const string UsePostfixUnaryOperatorInsteadOfAssignment = "RCS1089";
+        public const string UseUnaryOperatorInsteadOfAssignment = "RCS1089";
         public const string CallConfigureAwait = "RCS1090";
         public const string RemoveEmptyRegion = "RCS1091";
         public const string AddEmptyLineBeforeWhileInDoStatement = "RCS1092";
@@ -139,7 +139,6 @@ namespace Roslynator.CSharp
         public const string AddEmptyLineAfterClosingBrace = "RCS1153";
         public const string SortEnumMembers = "RCS1154";
         public const string UseStringComparison = "RCS1155";
-        public const string UseStringLengthInsteadOfComparisonWithEmptyString = "RCS1156";
         public const string CompositeEnumValueContainsUndefinedFlag = "RCS1157";
         public const string StaticMemberInGenericTypeShouldUseTypeParameter = "RCS1158";
         public const string UseGenericEventHandler = "RCS1159";

@@ -4,6 +4,8 @@ namespace Roslynator
 {
     internal static class MetadataNames
     {
+        public static readonly MetadataName Microsoft_CodeAnalysis_CSharp_CSharpSyntaxNode = MetadataName.Parse("Microsoft.CodeAnalysis.CSharp.CSharpSyntaxNode");
+        public static readonly MetadataName Microsoft_CodeAnalysis_CSharp_SyntaxKind = MetadataName.Parse("Microsoft.CodeAnalysis.CSharp.SyntaxKind");
         public static readonly MetadataName System_ArgumentException = MetadataName.Parse("System.ArgumentException");
         public static readonly MetadataName System_ArgumentNullException = MetadataName.Parse("System.ArgumentNullException");
         public static readonly MetadataName System_Attribute = MetadataName.Parse("System.Attribute");
@@ -11,6 +13,7 @@ namespace Roslynator
         public static readonly MetadataName System_Collections_Generic = MetadataName.Parse("System.Collections.Generic");
         public static readonly MetadataName System_Collections_IComparer = MetadataName.Parse("System.Collections.IComparer");
         public static readonly MetadataName System_Collections_IEqualityComparer = MetadataName.Parse("System.Collections.IEqualityComparer");
+        public static readonly MetadataName System_Collections_Generic_IAsyncEnumerable_T = MetadataName.Parse("System.Collections.Generic.IAsyncEnumerable`1");
         public static readonly MetadataName System_Collections_Generic_IComparer_T = MetadataName.Parse("System.Collections.Generic.IComparer`1");
         public static readonly MetadataName System_Collections_Generic_IEqualityComparer_T = MetadataName.Parse("System.Collections.Generic.IEqualityComparer`1");
         public static readonly MetadataName System_Collections_Generic_IEnumerable_T = MetadataName.Parse("System.Collections.Generic.IEnumerable`1");
@@ -55,6 +58,7 @@ namespace Roslynator
         public static readonly MetadataName System_Threading_Tasks = MetadataName.Parse("System.Threading.Tasks");
         public static readonly MetadataName System_Threading_Tasks_Task = MetadataName.Parse("System.Threading.Tasks.Task");
         public static readonly MetadataName System_Threading_Tasks_Task_T = MetadataName.Parse("System.Threading.Tasks.Task`1");
+        public static readonly MetadataName System_Threading_Tasks_ValueTask = MetadataName.Parse("System.Threading.Tasks.ValueTask");
         public static readonly MetadataName System_Threading_Tasks_ValueTask_T = MetadataName.Parse("System.Threading.Tasks.ValueTask`1");
         public static readonly MetadataName System_TimeSpan = MetadataName.Parse("System.TimeSpan");
         public static readonly MetadataName System_ValueType = MetadataName.Parse("System.ValueType");

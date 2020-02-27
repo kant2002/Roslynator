@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Roslynator.CSharp.Analysis.UsePatternMatching;
 using Roslynator.CSharp.CodeFixes;
-using Roslynator.CSharp.Tests;
+using Roslynator.CSharp.Testing;
 using Xunit;
 
 namespace Roslynator.CSharp.Analysis.Tests
@@ -292,7 +292,7 @@ class C
         if (x is string && ((string)x) == s) { }
     }
 }
-", options: CSharpCodeVerificationOptions.DefaultWithCSharp6);
+", options: CSharpCodeVerificationOptions.Default_CSharp6);
         }
     }
 }

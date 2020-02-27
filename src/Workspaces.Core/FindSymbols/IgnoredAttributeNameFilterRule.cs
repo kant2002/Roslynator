@@ -42,31 +42,36 @@ namespace Roslynator.FindSymbols
 #if DEBUG
             private static readonly MetadataNameSet _knownVisibleAttributes = new MetadataNameSet(new string[]
             {
-            "Microsoft.CodeAnalysis.CommitHashAttribute",
-            "System.AttributeUsageAttribute",
-            "System.CLSCompliantAttribute",
-            "System.ComVisibleAttribute",
-            "System.FlagsAttribute",
-            "System.ObsoleteAttribute",
-            "System.ComponentModel.DefaultValueAttribute",
-            "System.ComponentModel.EditorBrowsableAttribute",
-            "System.Composition.MetadataAttributeAttribute",
-            "System.Reflection.AssemblyCompanyAttribute",
-            "System.Reflection.AssemblyCopyrightAttribute",
-            "System.Reflection.AssemblyDescriptionAttribute",
-            "System.Reflection.AssemblyFileVersionAttribute",
-            "System.Reflection.AssemblyInformationalVersionAttribute",
-            "System.Reflection.AssemblyMetadataAttribute",
-            "System.Reflection.AssemblyProductAttribute",
-            "System.Reflection.AssemblyTitleAttribute",
-            "System.Reflection.AssemblyTrademarkAttribute",
-            "System.Runtime.CompilerServices.InternalImplementationOnlyAttribute",
-            "System.Runtime.InteropServices.GuidAttribute",
-            "System.Runtime.Versioning.TargetFrameworkAttribute",
-            "System.Xml.Serialization.XmlArrayItemAttribute",
-            "System.Xml.Serialization.XmlAttributeAttribute",
-            "System.Xml.Serialization.XmlElementAttribute",
-            "System.Xml.Serialization.XmlRootAttribute",
+                "Microsoft.CodeAnalysis.CommitHashAttribute",
+                "System.AttributeUsageAttribute",
+                "System.CLSCompliantAttribute",
+                "System.ComVisibleAttribute",
+                "System.FlagsAttribute",
+                "System.ObsoleteAttribute",
+                "System.ComponentModel.DefaultValueAttribute",
+                "System.ComponentModel.EditorBrowsableAttribute",
+                "System.Composition.MetadataAttributeAttribute",
+                "System.Reflection.AssemblyCompanyAttribute",
+                "System.Reflection.AssemblyConfigurationAttribute",
+                "System.Reflection.AssemblyCopyrightAttribute",
+                "System.Reflection.AssemblyDescriptionAttribute",
+                "System.Reflection.AssemblyFileVersionAttribute",
+                "System.Reflection.AssemblyInformationalVersionAttribute",
+                "System.Reflection.AssemblyMetadataAttribute",
+                "System.Reflection.AssemblyProductAttribute",
+                "System.Reflection.AssemblyTitleAttribute",
+                "System.Reflection.AssemblyTrademarkAttribute",
+                "System.Reflection.AssemblyVersionAttribute",
+                "System.Resources.NeutralResourcesLanguageAttribute",
+                "System.Runtime.CompilerServices.InternalsVisibleToAttribute",
+                "System.Runtime.CompilerServices.InternalImplementationOnlyAttribute",
+                "System.Runtime.CompilerServices.RuntimeCompatibilityAttribute",
+                "System.Runtime.InteropServices.GuidAttribute",
+                "System.Runtime.Versioning.TargetFrameworkAttribute",
+                "System.Xml.Serialization.XmlArrayItemAttribute",
+                "System.Xml.Serialization.XmlAttributeAttribute",
+                "System.Xml.Serialization.XmlElementAttribute",
+                "System.Xml.Serialization.XmlRootAttribute",
             });
 #endif
 
@@ -95,9 +100,11 @@ namespace Roslynator.FindSymbols
                         return false;
                 }
 #if DEBUG
-                Debug.Assert(attributeClass.MetadataName == "FooAttribute"
-                    || attributeClass.MetadataName == "BarAttribute"
-                    || _knownVisibleAttributes.Contains(attributeClass), attributeClass.ToDisplayString());
+                Debug.Assert(
+                    attributeClass.MetadataName == "FooAttribute"
+                        || attributeClass.MetadataName == "BarAttribute"
+                        || _knownVisibleAttributes.Contains(attributeClass),
+                    attributeClass.ToDisplayString());
 #endif
                 return true;
             }

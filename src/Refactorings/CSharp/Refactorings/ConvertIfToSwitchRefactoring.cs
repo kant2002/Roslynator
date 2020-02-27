@@ -170,7 +170,7 @@ namespace Roslynator.CSharp.Refactorings
             CancellationToken cancellationToken)
         {
             SwitchStatementSyntax switchStatement = SwitchStatement(
-                GetSwitchExpression(ifStatement).WalkDownParentheses(),
+                ParenthesizedExpression(GetSwitchExpression(ifStatement).WalkDownParentheses()),
                 List(CreateSwitchSections(ifStatement)));
 
             switchStatement = switchStatement
@@ -329,7 +329,7 @@ namespace Roslynator.CSharp.Refactorings
 
             return false;
 
-            bool ShouldDescendIntoChildren(SyntaxKind kind)
+            static bool ShouldDescendIntoChildren(SyntaxKind kind)
             {
                 return !IsIterationStatement(kind) && !IsFunction(kind);
             }

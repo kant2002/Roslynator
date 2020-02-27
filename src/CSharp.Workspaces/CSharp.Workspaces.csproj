@@ -1,27 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.3</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup>
-    <Version>1.0.0.15</Version>
+    <Version>1.0.0.22</Version>
     <AssemblyName>Roslynator.CSharp.Workspaces</AssemblyName>
     <RootNamespace>Roslynator</RootNamespace>
     <CodeAnalysisRuleSet>..\api.ruleset</CodeAnalysisRuleSet>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\Roslynator.snk</AssemblyOriginatorKeyFile>
-    <LangVersion>7.2</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>bin\Release\netstandard1.3\Roslynator.CSharp.Workspaces.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\netstandard2.0\Roslynator.CSharp.Workspaces.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup>
     <PackageId>Roslynator.CSharp.Workspaces</PackageId>
     <PackageVersion>1.0.0</PackageVersion>
-    <Authors>Josef Pihrt</Authors>
     <Company></Company>
     <Description>This library extends functionality of package Microsoft.CodeAnalysis.CSharp.Workspaces
 
@@ -30,11 +26,10 @@ Roslynator.CSharp.CSharpFactory
 Roslynator.CSharp.CSharpFacts
 Roslynator.CSharp.SyntaxInfo
 Roslynator.NameGenerator</Description>
-    <Copyright>Copyright (c) 2017-2019 Josef Pihrt</Copyright>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/JosefPihrt/Roslynator</PackageProjectUrl>
-    <PackageIconUrl>http://pihrt.net/images/Roslynator.ico</PackageIconUrl>
+    <PackageIcon>icon.png</PackageIcon>
     <PackageReleaseNotes></PackageReleaseNotes>
     <PackageTags>Roslyn;Analyzer;Refactoring;Productivity;CodeAnalysis;C#;CSharp</PackageTags>
     <RepositoryUrl>https://github.com/JosefPihrt/Roslynator.git</RepositoryUrl>
@@ -42,13 +37,17 @@ Roslynator.NameGenerator</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.0.0-beta2" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="2.3.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.9.2" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CSharp\CSharp.csproj" />
     <ProjectReference Include="..\Workspaces.Core\Workspaces.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\images\icon.png" Pack="true" PackagePath="\" Visible="false" />
   </ItemGroup>
 
 </Project>

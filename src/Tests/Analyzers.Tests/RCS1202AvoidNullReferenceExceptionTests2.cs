@@ -20,7 +20,7 @@ namespace Roslynator.CSharp.Analysis.Tests
         [Theory, Trait(Traits.Analyzer, DiagnosticIdentifiers.AvoidNullReferenceException)]
         [InlineData("(x as string)[|.|]ToString()", "(x as string)?.ToString()")]
         [InlineData("(x as string)[|[[|]0]", "(x as string)?[0]")]
-        public async Task Test_AsExpression(string fromData, string toData)
+        public async Task Test_AsExpression(string source, string expected)
         {
             await VerifyDiagnosticAndFixAsync(@"
 using System.Collections.Generic;
@@ -34,7 +34,7 @@ class C
         var y = [||];
     }
 }
-", fromData, toData);
+", source, expected);
         }
 
         [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.AvoidNullReferenceException)]
@@ -113,6 +113,25 @@ class C
 static class E
 {
     public static C EM(this C c) => c;
+}
+");
+        }
+
+        [Fact, Trait(Traits.Analyzer, DiagnosticIdentifiers.AvoidNullReferenceException)]
+        public async Task TestNoDiagnostic_ThisCastedToItsInterface()
+        {
+            await VerifyNoDiagnosticAsync(@"
+interface I
+{
+    void M();
+}
+
+class C : I
+{
+    public void M() 
+    {
+        (this as I).M();
+    }
 }
 ");
         }

@@ -222,6 +222,9 @@ namespace Roslynator.CodeGeneration.CSharp
                     case "XmlElementStartTagSyntax":
                     case "XmlNameSyntax":
                     case "XmlPrefixSyntax":
+                    case "PositionalPatternClauseSyntax":
+                    case "PropertyPatternClauseSyntax":
+                    case "SubpatternSyntax":
                         {
                             if (UseCustomVisitMethod)
                             {
@@ -407,7 +410,8 @@ namespace Roslynator.CodeGeneration.CSharp
                     SimpleMemberAccessExpression(
                         IdentifierName(variableName),
                         IdentifierName(listPropertySymbol.Name)),
-                    VisitStatement(methodName, forEachVariableName), checkShouldVisit: true);
+                    VisitStatement(methodName, forEachVariableName),
+                    checkShouldVisit: true);
             }
             else
             {
@@ -534,8 +538,12 @@ namespace Roslynator.CodeGeneration.CSharp
                 TypeParameterList(TypeParameter("TNode")),
                 ParameterList(Parameter(GenericName("SeparatedSyntaxList", IdentifierName("TNode")), "list")),
                 SingletonList(TypeParameterConstraintClause("TNode", TypeConstraint(IdentifierName("SyntaxNode")))),
-                Block(ForEachVisitStatement("TNode", "node", IdentifierName("list"),
-                    VisitStatement("Visit", "node"), checkShouldVisit: true)),
+                Block(ForEachVisitStatement(
+                    "TNode",
+                    "node",
+                    IdentifierName("list"),
+                    VisitStatement("Visit", "node"),
+                    checkShouldVisit: true)),
                 default(ArrowExpressionClauseSyntax));
         }
 
@@ -554,7 +562,8 @@ namespace Roslynator.CodeGeneration.CSharp
                                 "SyntaxToken",
                                 "token",
                                 IdentifierName("list"),
-                                VisitStatement("VisitToken", "token"), checkShouldVisit: true)))));
+                                VisitStatement("VisitToken", "token"),
+                                checkShouldVisit: true)))));
         }
 
         internal virtual MethodDeclarationSyntax CreateVisitAbstractSyntaxMethodDeclaration(MetadataName metadataName)
@@ -568,7 +577,7 @@ namespace Roslynator.CodeGeneration.CSharp
                 ParameterList(Parameter(IdentifierName(name), "node")),
                 Block(
                     SwitchStatement(
-                        SimpleMemberInvocationExpression(IdentifierName("node"), IdentifierName("Kind")),
+                        SimpleMemberInvocationExpression(IdentifierName("node"), IdentifierName("Kind")).Parenthesize(),
                         CreateSections().ToSyntaxList())));
 
             IEnumerable<SwitchSectionSyntax> CreateSections()

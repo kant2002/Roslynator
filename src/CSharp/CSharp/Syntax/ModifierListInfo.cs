@@ -381,7 +381,7 @@ namespace Roslynator.CSharp.Syntax
             if (accessibility == newAccessibility)
                 return this;
 
-            comparer = comparer ?? ModifierKindComparer.Default;
+            comparer ??= ModifierKindComparer.Default;
 
             SyntaxNode declaration = Parent;
 
@@ -748,6 +748,11 @@ namespace Roslynator.CSharp.Syntax
                     case SyntaxKind.AsyncKeyword:
                         {
                             filter |= ModifierFilter.Async;
+                            break;
+                        }
+                    case SyntaxKind.ExternKeyword:
+                        {
+                            filter |= ModifierFilter.Extern;
                             break;
                         }
                     default:
