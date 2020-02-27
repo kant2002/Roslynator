@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Analyzers>
-  <Analyzer Identifier="UseDefaultLiteral" IsDevelopment="true">
-    <Id>RCS1239</Id>
-    <Title>Use default literal.</Title>
-    <MessageFormat>Use default literal.</MessageFormat>
+  <Analyzer Identifier="SimplifyDefaultExpression" IsDevelopment="true">
+    <Id>RCS1244</Id>
+    <Title>Simplify 'default' expression.</Title>
+    <MessageFormat>Simplify 'default' expression.</MessageFormat>
     <Category>Simplification</Category>
-    <DefaultSeverity>Info</DefaultSeverity>
+    <DefaultSeverity>Hidden</DefaultSeverity>
     <IsEnabledByDefault>true</IsEnabledByDefault>
     <SupportsFadeOut>true</SupportsFadeOut>
     <SupportsFadeOutAnalyzer>false</SupportsFadeOutAnalyzer>
-    <Summary></Summary>
+    <MinLanguageVersion>7.1</MinLanguageVersion>
+    <Summary>This analyzer is similar to [IDE0034](https://docs.microsoft.com/visualstudio/ide/common-quick-actions#remove-type-from-default-value-expression) but there are some differences. For example this analyzer does not simplify 'default' expression passed as an argument expression.</Summary>
     <Samples>
       <Sample>
         <Before><![CDATA[Foo M(Foo foo = default(Foo)) [|Id|]

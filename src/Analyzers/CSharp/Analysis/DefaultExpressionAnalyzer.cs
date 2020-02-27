@@ -15,7 +15,7 @@ namespace Roslynator.CSharp.Analysis
     {
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
         {
-            get { return ImmutableArray.Create(DiagnosticDescriptors.UseDefaultLiteral); }
+            get { return ImmutableArray.Create(DiagnosticDescriptors.SimplifyDefaultExpression); }
         }
 
         public override void Initialize(AnalysisContext context)
@@ -25,7 +25,11 @@ namespace Roslynator.CSharp.Analysis
 
             base.Initialize(context);
 
-            context.RegisterSyntaxNodeAction(AnalyzeDefaultExpression, SyntaxKind.DefaultExpression);
+            context.RegisterCompilationStartAction(startContext =>
+            {
+                if (((CSharpCompilation)startContext.Compilation).LanguageVersion >= LanguageVersion.CSharp7_1)
+                    startContext.RegisterSyntaxNodeAction(AnalyzeDefaultExpression, SyntaxKind.DefaultExpression);
+            });
         }
 
         public static void AnalyzeDefaultExpression(SyntaxNodeAnalysisContext context)
@@ -93,6 +97,9 @@ namespace Roslynator.CSharp.Analysis
                 case SyntaxKind.YieldReturnStatement:
                 case SyntaxKind.SimpleAssignmentExpression:
                     {
+                        if (parent.IsParentKind(SyntaxKind.ObjectInitializerExpression))
+                            return;
+
                         TypeInfo typeInfo = context.SemanticModel.GetTypeInfo(expression, context.CancellationToken);
 
                         if (typeInfo.Type != typeInfo.ConvertedType)
@@ -108,6 +115,8 @@ namespace Roslynator.CSharp.Analysis
                         return;
                     }
                 case SyntaxKind.Argument:
+                case SyntaxKind.ConstantPattern:
+                case SyntaxKind.CaseSwitchLabel:
                     {
                         return;
                     }
@@ -120,7 +129,7 @@ namespace Roslynator.CSharp.Analysis
 
             void ReportDiagnostic()
             {
-                DiagnosticHelpers.ReportDiagnostic(context, DiagnosticDescriptors.UseDefaultLiteral, Location.Create(defaultExpression.SyntaxTree, defaultExpression.ParenthesesSpan()));
+                DiagnosticHelpers.ReportDiagnostic(context, DiagnosticDescriptors.SimplifyDefaultExpression, Location.Create(defaultExpression.SyntaxTree, defaultExpression.ParenthesesSpan()));
             }
         }
     }

@@ -18,7 +18,7 @@ namespace Roslynator.CSharp.CodeFixes
     {
         public sealed override ImmutableArray<string> FixableDiagnosticIds
         {
-            get { return ImmutableArray.Create(DiagnosticIdentifiers.UseDefaultLiteral); }
+            get { return ImmutableArray.Create(DiagnosticIdentifiers.SimplifyDefaultExpression); }
         }
 
         public sealed override async Task RegisterCodeFixesAsync(CodeFixContext context)
@@ -34,11 +34,11 @@ namespace Roslynator.CSharp.CodeFixes
             {
                 switch (diagnostic.Id)
                 {
-                    case DiagnosticIdentifiers.UseDefaultLiteral:
+                    case DiagnosticIdentifiers.SimplifyDefaultExpression:
                         {
                             CodeAction codeAction = CodeAction.Create(
-                                "Use default literal",
-                                ct => ReplaceDefaultExpressionWithDefaultLiteralAsync(document, defaultExpression, ct),
+                                "Simplify 'default' expression",
+                                ct => SimplifyDefaultExpressionAsync(document, defaultExpression, ct),
                                 GetEquivalenceKey(diagnostic));
 
                             context.RegisterCodeFix(codeAction, diagnostic);
@@ -48,7 +48,7 @@ namespace Roslynator.CSharp.CodeFixes
             }
         }
 
-        private static Task<Document> ReplaceDefaultExpressionWithDefaultLiteralAsync(
+        private static Task<Document> SimplifyDefaultExpressionAsync(
             Document document,
             DefaultExpressionSyntax defaultExpression,
             CancellationToken cancellationToken)
